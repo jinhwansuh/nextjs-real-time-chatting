@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 
-const app = require('express')();
-const server = require('http').createServer(app);
+const express = require('express');
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+
 const io = require('socket.io')(server, {
   cors: {
     origin: '*',
@@ -13,8 +16,11 @@ app.get('/', (req: Request, res: Response) => {
   res.send('<h1>test</h1>');
 });
 
-io.on('connection', () => {
+io.on('connection', (socket: any) => {
   console.log('a user connected');
+  socket.on('chat message', (message: string) => {
+    console.log(message);
+  });
 });
 
 server.listen(8000, () => {
