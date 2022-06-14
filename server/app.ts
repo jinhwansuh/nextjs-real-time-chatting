@@ -19,7 +19,7 @@ app.get('/', (req: Request, res: Response) => {
 io.on('connection', (socket: any) => {
   console.log('a user connected');
   socket.on('chat message', (message: string) => {
-    console.log(message);
+    io.emit('send message', message);
   });
 });
 
