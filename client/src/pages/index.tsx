@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { io } from 'socket.io-client';
 import styles from '../styles/Home.module.css';
 
@@ -12,10 +12,10 @@ const Home: NextPage = () => {
   const [chat, setChat] = useState('');
   const [chatList, setChatList] = useState<string[]>([]);
 
-  const handleChat = () => {
-    socket.emit('first', {
-      post: chat,
-    });
+  const handleChat = (e: FormEvent) => {
+    e.preventDefault();
+    socket.emit('chat message', chat);
+    setChat('');
   };
 
   return (
@@ -28,11 +28,20 @@ const Home: NextPage = () => {
 
       <div>
         <br />
-        <input type="text" onChange={(e) => setChat(e.target.value)} />
-        <button onClick={handleChat}> send </button>
+
+        <form onSubmit={handleChat}>
+          <input
+            type="text"
+            value={chat}
+            onChange={(e) => setChat(e.target.value)}
+          />
+          <button onClick={handleChat}> send </button>
+        </form>
       </div>
 
-      {chatList.length > 0 && chatList?.map((chat) => `<li>${chat}</li>`)}
+      <br />
+      {chatList.length > 0 &&
+        chatList?.map((chat, index) => <li key={index}>{chat}</li>)}
     </div>
   );
 };
