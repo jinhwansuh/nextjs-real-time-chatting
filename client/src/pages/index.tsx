@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import styles from '../styles/Home.module.css';
 
@@ -17,6 +17,12 @@ const Home: NextPage = () => {
     socket.emit('chat message', chat);
     setChat('');
   };
+
+  useEffect(() => {
+    socket.on('send message', (message: string) => {
+      setChatList([...chatList, message]);
+    });
+  }, []);
 
   return (
     <div className={styles.container}>
