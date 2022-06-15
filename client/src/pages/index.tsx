@@ -22,7 +22,7 @@ const Home: NextPage = () => {
     socket.on('send message', (message: string) => {
       setChatList([...chatList, message]);
     });
-  }, []);
+  }, [chatList]);
 
   return (
     <div className={styles.container}>
