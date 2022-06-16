@@ -1,8 +1,12 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useRecoilState } from 'recoil';
 import { io } from 'socket.io-client';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
+import { userState } from '../atoms/user';
+import { Message } from '../types/chat';
 
 const socket = io(`http://localhost:8000`, {
   transports: ['websocket'],
@@ -10,16 +14,25 @@ const socket = io(`http://localhost:8000`, {
 
 const Home: NextPage = () => {
   const [chat, setChat] = useState('');
-  const [chatList, setChatList] = useState<string[]>([]);
+  const [chatList, setChatList] = useState<Message[]>([]);
+  const userName = useMemo(() => v4(), []);
+  const [user, setUser] = useRecoilState(userState);
+
+  useEffect(() => {
+    setUser({ name: userName });
+  }, []);
 
   const handleChat = (e: FormEvent) => {
     e.preventDefault();
-    socket.emit('chat message', chat);
+    socket.emit('chat message', {
+      name: user.name,
+      data: chat,
+    });
     setChat('');
   };
 
   useEffect(() => {
-    socket.on('send message', (message: string) => {
+    socket.on('send message', (message: Message) => {
       setChatList([...chatList, message]);
     });
   }, [chatList]);
@@ -32,9 +45,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        <br />
-
+      <Container>
         <form onSubmit={handleChat}>
           <input
             type="text"
@@ -43,22 +54,31 @@ const Home: NextPage = () => {
           />
           <button onClick={handleChat}> send </button>
         </form>
-      </main>
 
-      <br />
-      <ChattingWrapper>
-        {chatList.length > 0 &&
-          chatList?.map((chat, index) => <li key={index}>{chat}</li>)}
-      </ChattingWrapper>
+        <ChattingWrapper>
+          {chatList.length > 0 &&
+            chatList?.map((chat, index) => (
+              <li key={chat.name + index}>
+                {chat.name} : {chat.data}
+              </li>
+            ))}
+        </ChattingWrapper>
+      </Container>
+      {/* 이전꺼 참고 */}
     </>
   );
 };
 
-const Container = styled.main``;
+const Container = styled.main`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
 
 const ChattingWrapper = styled.div`
-  width: 200px;
-  height: 200px;
+  width: 800px;
+  height: 500px;
   background: tomato;
 `;
 

@@ -16,3 +16,8 @@ export interface SocketData {
   name: string;
   age: number;
 }
+
+export interface Message {
+  name: string;
+  data: string;
+}
