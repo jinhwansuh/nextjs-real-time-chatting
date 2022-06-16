@@ -17,10 +17,25 @@ const Home: NextPage = () => {
   const [chatList, setChatList] = useState<Message[]>([]);
   const userName = useMemo(() => v4(), []);
   const [user, setUser] = useRecoilState(userState);
+  const [nowUser, setNowUser] = useState<number>(0);
 
   useEffect(() => {
     setUser({ name: userName });
   }, []);
+
+  useEffect(() => {
+    socket.on('welcome', (data) => {
+      setNowUser(data.time.length);
+    });
+
+    socket.on('send message', (message: Message) => {
+      setChatList([...chatList, message]);
+    });
+
+    socket.on('bye', () => {
+      setNowUser(nowUser - 1);
+    });
+  }, [chatList, nowUser]);
 
   const handleChat = (e: FormEvent) => {
     e.preventDefault();
@@ -31,11 +46,14 @@ const Home: NextPage = () => {
     setChat('');
   };
 
-  useEffect(() => {
-    socket.on('send message', (message: Message) => {
-      setChatList([...chatList, message]);
-    });
-  }, [chatList]);
+  // const handleRoomClick = (number: number) => {
+  //   const room = io('/room' + number, {
+  //     transports: ['websocket'],
+  //   });
+  //   room.on('news', (data) => {
+  //     console.log(data);
+  //   });
+  // };
 
   return (
     <>
@@ -46,6 +64,7 @@ const Home: NextPage = () => {
       </Head>
 
       <Container>
+        현재 이용자 수 : {nowUser}
         <form onSubmit={handleChat}>
           <input
             type="text"
@@ -54,7 +73,6 @@ const Home: NextPage = () => {
           />
           <button onClick={handleChat}> send </button>
         </form>
-
         <ChattingWrapper>
           {chatList.length > 0 &&
             chatList?.map((chat, index) => (
@@ -63,6 +81,7 @@ const Home: NextPage = () => {
               </li>
             ))}
         </ChattingWrapper>
+        {/* <button onClick={() => handleRoomClick(1)}>room1</button> */}
       </Container>
       {/* 이전꺼 참고 */}
     </>
