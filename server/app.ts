@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 
-const express = require('express');
 const app = express();
-const http = require('http');
 const server = http.createServer(app);
 
 interface Message {
@@ -10,14 +10,14 @@ interface Message {
   data: string;
 }
 
-const io = require('socket.io')(server, {
+const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
   },
 });
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
 });
 
