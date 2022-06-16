@@ -5,6 +5,11 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 
+interface Message {
+  name: string;
+  data: string;
+}
+
 const io = require('socket.io')(server, {
   cors: {
     origin: '*',
@@ -18,7 +23,7 @@ app.get('/', (req: Request, res: Response) => {
 
 io.on('connection', (socket: any) => {
   console.log('a user connected');
-  socket.on('chat message', (message: string) => {
+  socket.on('chat message', (message: Message) => {
     io.emit('send message', message);
   });
 });
