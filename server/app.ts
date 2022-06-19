@@ -36,16 +36,28 @@ app.get('/', (req: express.Request, res: express.Response) => {
 //     io.emit('send message', message);
 //   });
 // });
+let room = ['room1', 'room2', 'room3'];
 
 const user = new Set();
 
-io.on('connection', (socket: Socket) => {
+io.on('connection', (socket) => {
   console.log('someone connected Index');
 
   user.add(socket.id);
 
   io.emit('welcome', {
-    time: [...user],
+    user: [...user],
+  });
+
+  socket.on('joinRoom', (num, name) => {
+    socket.join(room[num]);
+    io.to(room[num]).emit('joinRoom', num, name);
+  });
+
+  // 요거 추가
+  socket.on('leaveRoom', (num, name) => {
+    socket.leave(room[num]);
+    io.to(room[num]).emit('leaveRoom', num, name);
   });
 
   socket.on('chat message', (message: Message) => {
