@@ -1,28 +1,16 @@
 import React, { FormEvent, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
-import { userState } from '../../../atoms/user';
-import { ChattingAreaProps, Message } from '../../../types/chat';
+import { ChattingAreaProps } from '../../../types/chat';
 
-function EmailArea({
+function ChattingArea({
   socket,
   chatList,
-  roomNumber,
+  handleChatSubmit,
+  chatInputState,
+  setChatInputState,
   ...props
 }: ChattingAreaProps) {
-  const [chatState, setChatState] = useState('');
-  const [user, setUser] = useRecoilState(userState);
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    socket.emit('chat-message', {
-      name: user.name,
-      roomNumber: roomNumber,
-      message: chatState,
-    } as Message);
-    setChatState('');
-  };
-
   return (
     <StyledContainer {...props}>
       <StyledEmailWrapper>
@@ -33,13 +21,13 @@ function EmailArea({
             </li>
           ))}
       </StyledEmailWrapper>
-      <StyledForm onSubmit={handleSubmit}>
+      <StyledForm onSubmit={handleChatSubmit}>
         <StyledTextArea
           // onKeyPress={handleKeyPress}
-          value={chatState}
-          onChange={(e) => setChatState(e.target.value)}
+          value={chatInputState}
+          onChange={(e) => setChatInputState(e.target.value)}
         />
-        <StyledButton type="submit" disabled={!chatState.trim().length}>
+        <StyledButton type="submit" disabled={!chatInputState.trim().length}>
           전송
         </StyledButton>
       </StyledForm>
@@ -95,4 +83,4 @@ const StyledButton = styled.button`
   width: 45px;
 `;
 
-export default EmailArea;
+export default ChattingArea;

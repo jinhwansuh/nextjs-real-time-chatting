@@ -1,9 +1,17 @@
+import { FormEvent, MouseEvent, SetStateAction } from 'react';
 import { Socket } from 'socket.io-client';
 import { CSSProperties } from 'styled-components';
 
+export interface ServerToClientInitData {
+  allUser: string[];
+  room: any;
+  createdRoom: string[];
+}
+
 export interface Message {
   name: string;
-  data: string;
+  message: string;
+  roomNumber: number;
 }
 
 export interface ChatProps {
@@ -11,8 +19,15 @@ export interface ChatProps {
   style?: CSSProperties;
 }
 
-export interface ServerToClientInitData {
-  allUser: string[];
-  room: any;
-  createdRoom: string[];
+export interface RoomListProps extends ChatProps {
+  allUser: ServerToClientInitData['allUser'];
+  roomList: ServerToClientInitData['createdRoom'];
+  handleRoomChange: (e: string) => void;
+}
+
+export interface ChattingAreaProps extends ChatProps {
+  handleChatSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  chatInputState: string;
+  setChatInputState: any;
+  chatList: Message[];
 }

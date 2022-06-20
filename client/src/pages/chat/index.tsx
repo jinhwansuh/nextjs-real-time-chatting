@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { userState } from '../../atoms/user';
@@ -11,6 +11,7 @@ const Chat: NextPage = () => {
   const [serverState, setServerState] = useState<ServerToClientInitData>({});
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const [roomState, setRoomState] = useState<number>();
+  const [chatInputState, setChatInputState] = useState('');
   const [user, setUser] = useRecoilState(userState);
 
   useEffect(() => {
@@ -70,6 +71,16 @@ const Chat: NextPage = () => {
     });
   };
 
+  const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    currentSocket?.emit('chat-message', {
+      name: user.name,
+      roomNumber: roomState,
+      message: chatInputState,
+    } as Message);
+    setChatInputState('');
+  };
+
   return (
     <Main>
       {currentSocket && (
@@ -82,8 +93,10 @@ const Chat: NextPage = () => {
           />
           <ChattingArea
             socket={currentSocket}
-            roomNumber={roomState}
             chatList={chatListState}
+            handleChatSubmit={handleChatSubmit}
+            chatInputState={chatInputState}
+            setChatInputState={setChatInputState}
           />
         </>
       )}
