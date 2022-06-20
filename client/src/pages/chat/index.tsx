@@ -46,6 +46,7 @@ const Chat: NextPage = () => {
     currentSocket?.on('joinRoom', (data: Message) => {
       console.log(data);
       setChatListState([
+        ...chatListState,
         {
           name: data.name,
           roomNumber: data.roomNumber,
