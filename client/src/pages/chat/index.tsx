@@ -88,6 +88,7 @@ const Chat: NextPage = () => {
       {currentSocket && (
         <>
           <RoomList
+            roomState={roomState}
             socket={currentSocket}
             allUser={serverState?.allUser}
             roomList={serverState?.createdRoom}

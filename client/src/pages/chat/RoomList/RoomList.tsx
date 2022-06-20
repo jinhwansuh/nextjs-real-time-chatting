@@ -5,32 +5,39 @@ import { RoomListProps } from '../../../types/chat';
 const RoomList = ({
   socket,
   allUser,
+  roomState,
   roomList,
   handleRoomChange,
   ...props
 }: RoomListProps) => {
+  console.log(roomState);
   return (
     <StyledWrapper {...props}>
-      <StyledButton type="button">새로고침</StyledButton>
+      {roomState === undefined && <div>방을 선택해주세요</div>}
       <div>
-        <button
-          value={0}
-          onClick={(e) => handleRoomChange(e.currentTarget.value)}
-        >
-          room1
-        </button>
-        <button
-          value={1}
-          onClick={(e) => handleRoomChange(e.currentTarget.value)}
-        >
-          room2
-        </button>
-        <button
-          value={2}
-          onClick={(e) => handleRoomChange(e.currentTarget.value)}
-        >
-          room3
-        </button>
+        <div>
+          <button
+            value={0}
+            onClick={(e) => handleRoomChange(e.currentTarget.value)}
+          >
+            room1
+          </button>
+        </div>
+        <div>
+          <button
+            value={1}
+            onClick={(e) => handleRoomChange(e.currentTarget.value)}
+          >
+            room2
+          </button>
+          <div></div>
+          <button
+            value={2}
+            onClick={(e) => handleRoomChange(e.currentTarget.value)}
+          >
+            room3
+          </button>
+        </div>
       </div>
     </StyledWrapper>
   );

@@ -22,6 +22,7 @@ export interface ChatProps {
 export interface RoomListProps extends ChatProps {
   allUser: ServerToClientInitData['allUser'];
   roomList: ServerToClientInitData['createdRoom'];
+  roomState: number | undefined;
   handleRoomChange: (e: string) => void;
 }
 
