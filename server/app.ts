@@ -1,14 +1,10 @@
 import express from 'express';
 import http from 'http';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { Message, ServerToClientInitData } from '../client/src/types/chat';
 
 const app = express();
 const server = http.createServer(app);
-
-interface Message {
-  name: string;
-  data: string;
-}
 
 const io = new Server(server, {
   cors: {
@@ -38,35 +34,36 @@ app.get('/', (req: express.Request, res: express.Response) => {
 // });
 let room = ['room1', 'room2', 'room3'];
 
-const user = new Set();
+const allUser = new Set();
 
 io.on('connection', (socket) => {
   console.log('someone connected Index');
 
-  user.add(socket.id);
+  allUser.add(socket.id);
 
   io.emit('welcome', {
-    user: [...user],
-  });
+    allUser: [...allUser],
+    room: socket.rooms,
+    createdRoom: room,
+  } as ServerToClientInitData);
 
   socket.on('joinRoom', (num, name) => {
     socket.join(room[num]);
     io.to(room[num]).emit('joinRoom', num, name);
   });
 
-  // 요거 추가
   socket.on('leaveRoom', (num, name) => {
     socket.leave(room[num]);
     io.to(room[num]).emit('leaveRoom', num, name);
   });
 
-  socket.on('chat message', (message: Message) => {
-    io.emit('send message', message);
+  socket.on('chat-message', (num, name, message: Message) => {
+    io.to(room[num]).emit('chat-message', name, message);
   });
 
   socket.on('disconnect', () => {
     const disconnectedUser = socket.id;
-    user.delete(disconnectedUser);
+    allUser.delete(disconnectedUser);
     io.emit('bye', {});
   });
 });
