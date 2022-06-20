@@ -17,21 +17,6 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
 });
 
-// const chatRoom1 = io.of('/room1');
-// chatRoom1.on('connection', (socket: Socket) => {
-//   console.log('room1: a user connected');
-//   socket.on('chat message', (message: Message) => {
-//     io.emit('send message', message);
-//   });
-// });
-
-// const chatRoom2 = io.of('/room2');
-// chatRoom2.on('connection', (socket: Socket) => {
-//   console.log('room2: a user connected');
-//   socket.on('chat message', (message: Message) => {
-//     io.emit('send message', message);
-//   });
-// });
 let room = ['room1', 'room2', 'room3'];
 
 const allUser = new Set();
