@@ -47,21 +47,28 @@ io.on('connection', (socket) => {
     createdRoom: room,
   } as ServerToClientInitData);
 
-  socket.on('joinRoom', (num, name) => {
+  socket.on('joinRoom', (data: Message) => {
+    console.log('join : ', data);
+    const num = data.roomNumber;
     socket.join(room[num]);
-    io.to(room[num]).emit('joinRoom', num, name);
+    io.to(room[num]).emit('joinRoom', data);
   });
 
-  socket.on('leaveRoom', (num, name) => {
+  socket.on('leaveRoom', (data: Message) => {
+    console.log('leave : ', data);
+    const num = data.roomNumber;
     socket.leave(room[num]);
-    io.to(room[num]).emit('leaveRoom', num, name);
+    io.to(room[num]).emit('leaveRoom', data);
   });
 
-  socket.on('chat-message', (num, name, message: Message) => {
-    io.to(room[num]).emit('chat-message', name, message);
+  socket.on('chat-message', (data: Message) => {
+    console.log('message : ', data);
+    const num = data.roomNumber;
+    io.to(room[num]).emit('chat-message', data);
   });
 
   socket.on('disconnect', () => {
+    console.log('someone disconnected');
     const disconnectedUser = socket.id;
     allUser.delete(disconnectedUser);
     io.emit('bye', {});
