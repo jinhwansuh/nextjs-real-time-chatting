@@ -7,6 +7,12 @@ export interface Message {
 }
 
 export interface ChatProps {
-  socket: Socket | undefined;
+  socket: Socket;
   style?: CSSProperties;
+}
+
+export interface ServerToClientInitData {
+  allUser: string[];
+  room: any;
+  createdRoom: string[];
 }
