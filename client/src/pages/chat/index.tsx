@@ -58,17 +58,19 @@ const Chat: NextPage = () => {
   }, [chatListState, currentSocket, roomState]);
 
   const handleRoomChange = (roomNumber: string) => {
-    setRoomState(Number(roomNumber));
-    setChatListState([]);
-    if (roomState)
-      currentSocket?.emit('leaveRoom', {
-        roomNumber: roomState,
+    if (roomState !== Number(roomNumber)) {
+      setRoomState(Number(roomNumber));
+      setChatListState([]);
+      if (roomState)
+        currentSocket?.emit('leaveRoom', {
+          roomNumber: roomState,
+          name: user.name,
+        });
+      currentSocket?.emit('joinRoom', {
+        roomNumber: Number(roomNumber),
         name: user.name,
       });
-    currentSocket?.emit('joinRoom', {
-      roomNumber: Number(roomNumber),
-      name: user.name,
-    });
+    }
   };
 
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
