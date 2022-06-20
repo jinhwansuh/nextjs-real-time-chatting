@@ -61,7 +61,7 @@ const Chat: NextPage = () => {
     if (roomState !== Number(roomNumber)) {
       setRoomState(Number(roomNumber));
       setChatListState([]);
-      if (roomState)
+      if (roomState! >= 0)
         currentSocket?.emit('leaveRoom', {
           roomNumber: roomState,
           name: user.name,
