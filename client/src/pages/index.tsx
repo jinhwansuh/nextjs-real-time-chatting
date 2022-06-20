@@ -1,29 +1,12 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
-import { FormEvent, useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { userState } from '../atoms/user';
-import Modal from '../components/domain/Modal';
+import Layout from '../components/layout';
+import type { NextPageWithLayout } from './_app';
 
-const Home: NextPage = () => {
-  const [visible, setVisible] = useState(false);
-  const [user, setUser] = useRecoilState(userState);
-  const [userName, setUserName] = useState('');
-
-  useEffect(() => {
-    if (user.name.length === 0) {
-      setVisible(true);
-    }
-  }, []);
-
-  const handleUserModal = (e: FormEvent<HTMLFormElement>) => {
-    setUser({ name: userName });
-    setVisible(false);
-    setUserName('');
-  };
-
+const Home: NextPageWithLayout = () => {
   return (
     <>
       <Head>
@@ -32,28 +15,20 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {visible ? (
-        <Modal visible={visible} onClose={() => setVisible(false)}>
-          <form onSubmit={handleUserModal}>
-            <input
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            ></input>
-            <button> 확인 </button>
-          </form>
-        </Modal>
-      ) : (
-        <StyledContainer>
-          <StyledTitle>Try Real Time App</StyledTitle>
-          <CardWrapper>
-            <Link href="/chat">
-              <Card>Real time chat</Card>
-            </Link>
-          </CardWrapper>
-        </StyledContainer>
-      )}
+      <StyledContainer>
+        <StyledTitle>Try Real Time App</StyledTitle>
+        <CardWrapper>
+          <Link href="/chat">
+            <Card>Real time chat</Card>
+          </Link>
+        </CardWrapper>
+      </StyledContainer>
     </>
   );
+};
+
+Home.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
 };
 
 const StyledContainer = styled.main`

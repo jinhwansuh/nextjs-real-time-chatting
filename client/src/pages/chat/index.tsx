@@ -1,18 +1,20 @@
 import { NextPage } from 'next';
-import React, { FormEvent, useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import React, { FormEvent, ReactElement, useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
-import { userState } from '../../atoms/user';
+import { user } from '../../atoms/user';
+import Layout from '../../components/layout';
 import { Message, ServerToClientInitData } from '../../types/chat';
+import type { NextPageWithLayout } from '../_app';
 import { RoomList, ChattingArea, Main } from './index.styled';
 
-const Chat: NextPage = () => {
+const Chat: NextPageWithLayout = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [serverState, setServerState] = useState<ServerToClientInitData>({});
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const [roomState, setRoomState] = useState<number>();
   const [chatInputState, setChatInputState] = useState('');
-  const [user, setUser] = useRecoilState(userState);
+  const userState = useRecoilValue(user);
 
   useEffect(() => {
     const socket = io(`http://localhost:8000`, {
@@ -64,11 +66,11 @@ const Chat: NextPage = () => {
       if (roomState! >= 0)
         currentSocket?.emit('leaveRoom', {
           roomNumber: roomState,
-          name: user.name,
+          name: userState.name,
         });
       currentSocket?.emit('joinRoom', {
         roomNumber: Number(roomNumber),
-        name: user.name,
+        name: userState.name,
       });
     }
   };
@@ -76,7 +78,7 @@ const Chat: NextPage = () => {
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     currentSocket?.emit('chat-message', {
-      name: user.name,
+      name: userState.name,
       roomNumber: roomState,
       message: chatInputState,
     } as Message);
@@ -105,6 +107,10 @@ const Chat: NextPage = () => {
       )}
     </Main>
   );
+};
+
+Chat.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
 };
 
 export default Chat;
