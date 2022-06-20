@@ -16,27 +16,27 @@ const RoomList = ({
       {roomState === undefined && <div>방을 선택해주세요</div>}
       <div>
         <div>
-          <button
+          <StyledButton
             value={0}
             onClick={(e) => handleRoomChange(e.currentTarget.value)}
           >
             room1
-          </button>
+          </StyledButton>
         </div>
         <div>
-          <button
+          <StyledButton
             value={1}
             onClick={(e) => handleRoomChange(e.currentTarget.value)}
           >
             room2
-          </button>
+          </StyledButton>
           <div></div>
-          <button
+          <StyledButton
             value={2}
             onClick={(e) => handleRoomChange(e.currentTarget.value)}
           >
             room3
-          </button>
+          </StyledButton>
         </div>
       </div>
     </StyledWrapper>
