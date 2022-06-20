@@ -1,9 +1,29 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { FormEvent, useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
+import { userState } from '../atoms/user';
+import Modal from '../components/domain/Modal';
 
 const Home: NextPage = () => {
+  const [visible, setVisible] = useState(false);
+  const [user, setUser] = useRecoilState(userState);
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    if (user.name.length === 0) {
+      setVisible(true);
+    }
+  }, []);
+
+  const handleUserModal = (e: FormEvent<HTMLFormElement>) => {
+    setUser({ name: userName });
+    setVisible(false);
+    setUserName('');
+  };
+
   return (
     <>
       <Head>
@@ -12,13 +32,26 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <StyledContainer>
-        <CardWrapper>
-          <Link href="/chat">
-            <Card>try real time chat</Card>
-          </Link>
-        </CardWrapper>
-      </StyledContainer>
+      {visible ? (
+        <Modal visible={visible} onClose={() => setVisible(false)}>
+          <form onSubmit={handleUserModal}>
+            <input
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+            ></input>
+            <button> 확인 </button>
+          </form>
+        </Modal>
+      ) : (
+        <StyledContainer>
+          <StyledTitle>Try Real Time App</StyledTitle>
+          <CardWrapper>
+            <Link href="/chat">
+              <Card>Real time chat</Card>
+            </Link>
+          </CardWrapper>
+        </StyledContainer>
+      )}
     </>
   );
 };
@@ -33,6 +66,12 @@ const StyledContainer = styled.main`
   align-items: center;
 `;
 
+const StyledTitle = styled.h1`
+  margin: 0;
+  line-height: 1.15;
+  font-size: 3rem;
+`;
+
 const CardWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -42,7 +81,7 @@ const CardWrapper = styled.div`
 `;
 
 const Card = styled.a`
-  margin: 1rem;
+  margin: 1.5rem;
   padding: 1.5rem;
   text-align: left;
   color: inherit;
@@ -50,7 +89,10 @@ const Card = styled.a`
   border: 1px solid #eaeaea;
   border-radius: 10px;
   transition: color 0.15s ease, border-color 0.15s ease;
-  max-width: 300px;
+  width: 200px;
+  background-color: #e1e3c4;
+  text-align: center;
+
   cursor: pointer;
   &:hover,
   &:focus,
