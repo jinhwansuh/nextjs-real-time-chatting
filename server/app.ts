@@ -1,7 +1,11 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import { Message, ServerToClientInitData } from '../client/src/types/chat';
+import {
+  Message,
+  ServerToClientData,
+  ServerToClientInitData,
+} from '../client/src/types/chat';
 
 const app = express();
 const server = http.createServer(app);
@@ -19,44 +23,52 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 let room = ['room1', 'room2', 'room3'];
 
-const allUser = new Set();
+// let ss = [
+//   {
+//     index: 0,
+//     roomName: 'room1',
+//     roomUser: 0,
+//   },
+// ];
 
 io.on('connection', (socket) => {
   console.log('someone connected Index');
 
-  allUser.add(socket.id);
+  const clientsCount = io.engine.clientsCount; // 전체 유저
 
   io.emit('welcome', {
-    allUser: [...allUser],
-    room: socket.rooms,
+    allUserCount: clientsCount,
     createdRoom: room,
   } as ServerToClientInitData);
 
   socket.on('joinRoom', (data: Message) => {
-    console.log('join : ', data);
     const num = data.roomNumber;
     socket.join(room[num]);
-    io.to(room[num]).emit('joinRoom', data);
+
+    const clientsInRoom = io.sockets.adapter.rooms.get(room[num])?.size || 0; // 방 유저
+    const serverToClientData: ServerToClientData = { ...data, clientsInRoom };
+
+    io.to(room[num]).emit('joinRoom', serverToClientData);
   });
 
   socket.on('leaveRoom', (data: Message) => {
-    console.log('leave : ', data);
     const num = data.roomNumber;
     socket.leave(room[num]);
-    io.to(room[num]).emit('leaveRoom', data);
+
+    const clientsInRoom = io.sockets.adapter.rooms.get(room[num])?.size || 0;
+    const serverToClientData: ServerToClientData = { ...data, clientsInRoom };
+    io.to(room[num]).emit('leaveRoom', serverToClientData);
   });
 
   socket.on('chat-message', (data: Message) => {
-    console.log('message : ', data);
     const num = data.roomNumber;
     io.to(room[num]).emit('chat-message', data);
   });
 
   socket.on('disconnect', () => {
     console.log('someone disconnected');
-    const disconnectedUser = socket.id;
-    allUser.delete(disconnectedUser);
-    io.emit('bye', {});
+    const clientsCount = io.engine.clientsCount; // 전체 유저
+    io.emit('leavePage', clientsCount);
   });
 });
 
