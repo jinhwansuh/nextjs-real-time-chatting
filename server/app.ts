@@ -21,7 +21,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
 });
 
-let room = ['room1', 'room2', 'room3'];
+let room = ['room0', 'room1', 'room2'];
 
 // let ss = [
 //   {
