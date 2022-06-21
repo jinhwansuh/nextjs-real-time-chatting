@@ -15,6 +15,7 @@ export default function Layout({ children }: any) {
   }, [userState.name]);
 
   const handleUserModal = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setUserState({ name: userName });
     setUserNameModalState(false);
     setUserName('');
