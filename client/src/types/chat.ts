@@ -23,17 +23,16 @@ export interface Props {
 }
 
 export interface RoomListProps extends Props {
-  allUser: ServerToClientInitData['allUserCount'];
-  roomList: ServerRoomList;
+  serverData: ServerToClientInitData | undefined;
   clientInRoom: number;
   roomState: number | undefined;
   handleRoomChange: (e: string) => void;
 }
 
 export interface ChattingAreaProps extends Props {
-  handleChatSubmit: (e: FormEvent<HTMLFormElement>) => void;
   chatInputState: string;
-  setChatInputState: (e: any) => any;
   containerRef: RefObject<HTMLDivElement>;
   chatList: Message[];
+  handleChatSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  setChatInputState: (e: any) => any;
 }

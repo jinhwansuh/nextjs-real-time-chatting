@@ -14,10 +14,7 @@ import { RoomList, ChattingArea, Main } from './index.styled';
 
 const Chat: NextPageWithLayout = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
-  const [serverState, setServerState] = useState<ServerToClientInitData>({
-    allUserCount: 0,
-    createdRoom: [],
-  });
+  const [serverState, setServerState] = useState<ServerToClientInitData>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [clientInCurrentRoom, setClientInCurrentRoom] = useState(0);
   const [chatListState, setChatListState] = useState<Message[]>([]);
@@ -65,10 +62,13 @@ const Chat: NextPageWithLayout = () => {
     });
 
     socket.on('leavePage', (data: number) => {
-      setServerState((prev) => ({
-        ...prev,
-        allUserCount: data,
-      }));
+      setServerState(
+        (prev) =>
+          ({
+            ...prev,
+            allUserCount: data,
+          } as ServerToClientInitData)
+      );
     });
 
     return () => {
@@ -112,24 +112,19 @@ const Chat: NextPageWithLayout = () => {
 
   return (
     <Main>
-      {currentSocket && (
-        <>
-          <RoomList
-            roomState={roomState}
-            allUser={serverState?.allUserCount}
-            roomList={serverState?.createdRoom}
-            clientInRoom={clientInCurrentRoom}
-            handleRoomChange={handleRoomChange}
-          />
-          <ChattingArea
-            chatList={chatListState}
-            containerRef={containerRef}
-            handleChatSubmit={handleChatSubmit}
-            chatInputState={chatInputState}
-            setChatInputState={setChatInputState}
-          />
-        </>
-      )}
+      <RoomList
+        roomState={roomState}
+        serverData={serverState}
+        clientInRoom={clientInCurrentRoom}
+        handleRoomChange={handleRoomChange}
+      />
+      <ChattingArea
+        chatList={chatListState}
+        containerRef={containerRef}
+        handleChatSubmit={handleChatSubmit}
+        chatInputState={chatInputState}
+        setChatInputState={setChatInputState}
+      />
     </Main>
   );
 };
