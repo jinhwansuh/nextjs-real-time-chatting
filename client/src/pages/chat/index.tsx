@@ -111,14 +111,12 @@ const Chat: NextPageWithLayout = () => {
         <>
           <RoomList
             roomState={roomState}
-            socket={currentSocket}
             allUser={serverState?.allUserCount}
             roomList={serverState?.createdRoom}
             clientInRoom={clientInCurrentRoom}
             handleRoomChange={handleRoomChange}
           />
           <ChattingArea
-            socket={currentSocket}
             chatList={chatListState}
             handleChatSubmit={handleChatSubmit}
             chatInputState={chatInputState}

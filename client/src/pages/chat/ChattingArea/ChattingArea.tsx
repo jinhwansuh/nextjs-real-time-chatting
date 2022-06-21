@@ -1,10 +1,7 @@
-import React, { FormEvent, useState } from 'react';
-import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { ChattingAreaProps } from '../../../types/chat';
 
 function ChattingArea({
-  socket,
   chatList,
   handleChatSubmit,
   chatInputState,

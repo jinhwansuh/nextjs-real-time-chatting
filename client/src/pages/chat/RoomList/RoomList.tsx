@@ -1,9 +1,7 @@
-import React from 'react';
 import styled from 'styled-components';
 import { RoomListProps } from '../../../types/chat';
 
 const RoomList = ({
-  socket,
   allUser,
   roomState,
   roomList,
