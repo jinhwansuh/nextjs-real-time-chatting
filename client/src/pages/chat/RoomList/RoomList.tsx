@@ -7,6 +7,7 @@ const RoomList = ({
   allUser,
   roomState,
   roomList,
+  clientInRoom,
   handleRoomChange,
   ...props
 }: RoomListProps) => {
@@ -16,7 +17,9 @@ const RoomList = ({
       {roomState === undefined ? (
         <div>방을 선택해주세요</div>
       ) : (
-        <div>{roomState}번 방 인원 5</div>
+        <div>
+          {roomState}번 방 인원 {clientInRoom}
+        </div>
       )}
       <div>
         <div>
@@ -24,7 +27,7 @@ const RoomList = ({
             value={0}
             onClick={(e) => handleRoomChange(e.currentTarget.value)}
           >
-            room1
+            room0
           </StyledButton>
         </div>
         <div>
@@ -32,14 +35,14 @@ const RoomList = ({
             value={1}
             onClick={(e) => handleRoomChange(e.currentTarget.value)}
           >
-            room2
+            room1
           </StyledButton>
           <div></div>
           <StyledButton
             value={2}
             onClick={(e) => handleRoomChange(e.currentTarget.value)}
           >
-            room3
+            room2
           </StyledButton>
         </div>
       </div>

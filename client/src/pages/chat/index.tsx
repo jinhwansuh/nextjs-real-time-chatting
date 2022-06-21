@@ -4,7 +4,11 @@ import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { user } from '../../atoms/user';
 import Layout from '../../components/layout';
-import { Message, ServerToClientInitData } from '../../types/chat';
+import {
+  Message,
+  ServerToClientData,
+  ServerToClientInitData,
+} from '../../types/chat';
 import type { NextPageWithLayout } from '../_app';
 import { RoomList, ChattingArea, Main } from './index.styled';
 
@@ -14,6 +18,7 @@ const Chat: NextPageWithLayout = () => {
     allUserCount: 0,
     createdRoom: [],
   });
+  const [clientInCurrentRoom, setClientInCurrentRoom] = useState(0);
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const [roomState, setRoomState] = useState<number>();
   const [chatInputState, setChatInputState] = useState('');
@@ -34,7 +39,8 @@ const Chat: NextPageWithLayout = () => {
       setChatListState((prev) => [...prev, data]);
     });
 
-    socket.on('leaveRoom', (data: Message) => {
+    socket.on('leaveRoom', (data: ServerToClientData) => {
+      setClientInCurrentRoom((prev) => prev - 1);
       setChatListState((prev) => [
         ...prev,
         {
@@ -45,7 +51,8 @@ const Chat: NextPageWithLayout = () => {
       ]);
     });
 
-    socket.on('joinRoom', (data: Message) => {
+    socket.on('joinRoom', (data: ServerToClientData) => {
+      setClientInCurrentRoom(data.clientsInRoom);
       setChatListState((prev) => [
         ...prev,
         {
@@ -56,7 +63,7 @@ const Chat: NextPageWithLayout = () => {
       ]);
     });
 
-    socket.on('leavePage', (data: any) => {
+    socket.on('leavePage', (data: number) => {
       setServerState((prev) => ({
         ...prev,
         allUserCount: data,
@@ -75,6 +82,7 @@ const Chat: NextPageWithLayout = () => {
     if (roomState !== roomNumber) {
       setRoomState(roomNumber);
       setChatListState([]);
+      setClientInCurrentRoom(0);
       if (roomState! >= 0)
         currentSocket?.emit('leaveRoom', {
           roomNumber: roomState,
@@ -106,6 +114,7 @@ const Chat: NextPageWithLayout = () => {
             socket={currentSocket}
             allUser={serverState?.allUserCount}
             roomList={serverState?.createdRoom}
+            clientInRoom={clientInCurrentRoom}
             handleRoomChange={handleRoomChange}
           />
           <ChattingArea
