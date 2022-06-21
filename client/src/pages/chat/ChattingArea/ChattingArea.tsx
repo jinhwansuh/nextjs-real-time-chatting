@@ -3,20 +3,20 @@ import { ChattingAreaProps } from '../../../types/chat';
 
 function ChattingArea({
   chatList,
+  containerRef,
   handleChatSubmit,
   chatInputState,
   setChatInputState,
   ...props
 }: ChattingAreaProps) {
   return (
-    <StyledContainer {...props}>
+    <StyledContainer {...props} ref={containerRef}>
       <StyledEmailWrapper>
-        {chatList.length > 0 &&
-          chatList?.map((chat, index) => (
-            <li key={chat.name + index}>
-              {chat.name} : {chat.message}
-            </li>
-          ))}
+        {chatList?.map((chat, index) => (
+          <li key={chat.name + index}>
+            {chat.name} : {chat.message}
+          </li>
+        ))}
       </StyledEmailWrapper>
       <StyledForm onSubmit={handleChatSubmit}>
         <StyledTextArea

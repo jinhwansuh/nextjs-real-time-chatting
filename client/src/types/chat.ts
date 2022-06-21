@@ -1,4 +1,4 @@
-import { FormEvent } from 'react';
+import { FormEvent, RefObject } from 'react';
 import { CSSProperties } from 'styled-components';
 
 export interface ServerToClientInitData {
@@ -32,5 +32,6 @@ export interface ChattingAreaProps extends Props {
   handleChatSubmit: (e: FormEvent<HTMLFormElement>) => void;
   chatInputState: string;
   setChatInputState: (e: any) => any;
+  containerRef: RefObject<HTMLDivElement>;
   chatList: Message[];
 }

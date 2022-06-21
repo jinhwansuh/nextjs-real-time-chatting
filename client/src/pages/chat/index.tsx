@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import React, { FormEvent, ReactElement, useEffect, useState } from 'react';
+import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { user } from '../../atoms/user';
@@ -18,6 +18,7 @@ const Chat: NextPageWithLayout = () => {
     allUserCount: 0,
     createdRoom: [],
   });
+  const containerRef = useRef<HTMLDivElement>(null);
   const [clientInCurrentRoom, setClientInCurrentRoom] = useState(0);
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const [roomState, setRoomState] = useState<number>();
@@ -77,6 +78,10 @@ const Chat: NextPageWithLayout = () => {
     };
   }, []);
 
+  useEffect(() => {
+    containerRef.current?.scrollTo(0, containerRef.current.scrollHeight);
+  }, [chatListState]);
+
   const handleRoomChange = (number: string) => {
     const roomNumber = Number(number);
     if (roomState !== roomNumber) {
@@ -118,6 +123,7 @@ const Chat: NextPageWithLayout = () => {
           />
           <ChattingArea
             chatList={chatListState}
+            containerRef={containerRef}
             handleChatSubmit={handleChatSubmit}
             chatInputState={chatInputState}
             setChatInputState={setChatInputState}
