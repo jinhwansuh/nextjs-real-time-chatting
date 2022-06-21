@@ -72,9 +72,7 @@ const Chat: NextPageWithLayout = () => {
     });
 
     return () => {
-      socket.off('connect');
-      // socket.off('disconnect');
-      // socket.off('pong');
+      socket.close();
     };
   }, []);
 
