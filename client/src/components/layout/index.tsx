@@ -1,7 +1,6 @@
-import { FormEvent, ReactNode, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { user, userNameModal } from '../../atoms/user';
-import Modal from '../domain/Modal';
 
 export default function Layout({ children }: any) {
   const [userState, setUserState] = useRecoilState(user);
