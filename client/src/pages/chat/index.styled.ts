@@ -4,10 +4,6 @@ import BaseRoomList from './RoomList/RoomList';
 import BaseChattingArea from './ChattingArea/ChattingArea';
 
 const Main = styled.main`
-  display: flex;
-  width: 1100px;
-  height: 650px;
-  margin: 20px auto;
   border: 1px solid #ddd;
 `;
 

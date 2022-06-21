@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { user } from '../../atoms/user';
 
-export default function Layout({ children }: any) {
+const Layout = ({ children }: any) => {
   const [userState, setUserState] = useRecoilState(user);
   const [userName, setUserName] = useState('');
 
@@ -14,9 +14,9 @@ export default function Layout({ children }: any) {
 
   if (userState.name.length === 0)
     return (
-      <div>
+      <main>
         <form onSubmit={handleUserName}>
-          이름을 입력해주세요. ~~
+          What is your name
           <div>
             <input
               value={userName}
@@ -25,8 +25,10 @@ export default function Layout({ children }: any) {
             <button> 확인 </button>
           </div>
         </form>
-      </div>
+      </main>
     );
 
   return <>{children}</>;
-}
+};
+
+export default Layout;
