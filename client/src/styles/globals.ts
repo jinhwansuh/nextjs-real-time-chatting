@@ -17,4 +17,11 @@ export const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
   }
+
+  main {
+    display: flex;
+    width: 1100px;
+    min-height: 650px;
+    margin: 20px auto;
+  }
 `;
