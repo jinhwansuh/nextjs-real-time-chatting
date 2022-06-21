@@ -6,8 +6,3 @@ export const user = atom({
     name: '',
   },
 });
-
-export const userNameModal = atom({
-  key: 'userNameModalKey',
-  default: false,
-});
