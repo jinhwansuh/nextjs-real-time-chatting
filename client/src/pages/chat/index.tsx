@@ -10,7 +10,10 @@ import { RoomList, ChattingArea, Main } from './index.styled';
 
 const Chat: NextPageWithLayout = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
-  const [serverState, setServerState] = useState<ServerToClientInitData>({});
+  const [serverState, setServerState] = useState<ServerToClientInitData>({
+    allUserCount: 0,
+    createdRoom: [],
+  });
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const [roomState, setRoomState] = useState<number>();
   const [chatInputState, setChatInputState] = useState('');
@@ -26,18 +29,14 @@ const Chat: NextPageWithLayout = () => {
     });
 
     setCurrentSocket(socket);
-  }, []);
 
-  useEffect(() => {
-    currentSocket?.on('chat-message', (data: Message) => {
-      console.log(data);
-      setChatListState([...chatListState, data]);
+    socket.on('chat-message', (data: Message) => {
+      setChatListState((prev) => [...prev, data]);
     });
 
-    currentSocket?.on('leaveRoom', (data: Message) => {
-      console.log(data);
-      setChatListState([
-        ...chatListState,
+    socket.on('leaveRoom', (data: Message) => {
+      setChatListState((prev) => [
+        ...prev,
         {
           name: data.name,
           roomNumber: data.roomNumber,
@@ -46,10 +45,9 @@ const Chat: NextPageWithLayout = () => {
       ]);
     });
 
-    currentSocket?.on('joinRoom', (data: Message) => {
-      console.log(data);
-      setChatListState([
-        ...chatListState,
+    socket.on('joinRoom', (data: Message) => {
+      setChatListState((prev) => [
+        ...prev,
         {
           name: data.name,
           roomNumber: data.roomNumber,
@@ -57,11 +55,25 @@ const Chat: NextPageWithLayout = () => {
         },
       ]);
     });
-  }, [chatListState, currentSocket, roomState]);
 
-  const handleRoomChange = (roomNumber: string) => {
-    if (roomState !== Number(roomNumber)) {
-      setRoomState(Number(roomNumber));
+    socket.on('leavePage', (data: any) => {
+      setServerState((prev) => ({
+        ...prev,
+        allUserCount: data,
+      }));
+    });
+
+    return () => {
+      socket.off('connect');
+      // socket.off('disconnect');
+      // socket.off('pong');
+    };
+  }, []);
+
+  const handleRoomChange = (number: string) => {
+    const roomNumber = Number(number);
+    if (roomState !== roomNumber) {
+      setRoomState(roomNumber);
       setChatListState([]);
       if (roomState! >= 0)
         currentSocket?.emit('leaveRoom', {
@@ -69,7 +81,7 @@ const Chat: NextPageWithLayout = () => {
           name: userState.name,
         });
       currentSocket?.emit('joinRoom', {
-        roomNumber: Number(roomNumber),
+        roomNumber: roomNumber,
         name: userState.name,
       });
     }
@@ -92,7 +104,7 @@ const Chat: NextPageWithLayout = () => {
           <RoomList
             roomState={roomState}
             socket={currentSocket}
-            allUser={serverState?.allUser}
+            allUser={serverState?.allUserCount}
             roomList={serverState?.createdRoom}
             handleRoomChange={handleRoomChange}
           />
