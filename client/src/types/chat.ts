@@ -1,9 +1,11 @@
 import { FormEvent, RefObject } from 'react';
 import { CSSProperties } from 'styled-components';
 
+export type ServerRoomList = string[];
+
 export interface ServerToClientInitData {
   allUserCount: number;
-  createdRoom: string[];
+  createdRoom: ServerRoomList;
 }
 
 export interface Message {
@@ -22,7 +24,7 @@ export interface Props {
 
 export interface RoomListProps extends Props {
   allUser: ServerToClientInitData['allUserCount'];
-  roomList: ServerToClientInitData['createdRoom'];
+  roomList: ServerRoomList;
   clientInRoom: number;
   roomState: number | undefined;
   handleRoomChange: (e: string) => void;

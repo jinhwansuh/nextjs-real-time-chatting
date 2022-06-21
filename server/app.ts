@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import {
   Message,
+  ServerRoomList,
   ServerToClientData,
   ServerToClientInitData,
 } from '../client/src/types/chat';
@@ -21,7 +22,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
 });
 
-let room = ['room0', 'room1', 'room2'];
+let room: ServerRoomList = ['room0', 'room1', 'room2'];
 
 // let ss = [
 //   {
