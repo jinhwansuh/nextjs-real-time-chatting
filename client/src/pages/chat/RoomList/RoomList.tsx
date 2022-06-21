@@ -2,17 +2,23 @@ import styled from 'styled-components';
 import { RoomListProps } from '../../../types/chat';
 
 const RoomList = ({
-  allUser,
+  serverData,
   roomState,
-  roomList,
   clientInRoom,
   handleRoomChange,
   ...props
 }: RoomListProps) => {
+  if (!serverData) {
+    return (
+      <StyledWrapper {...props}>
+        <div>소켓 연결에 실패했습니다.</div>
+      </StyledWrapper>
+    );
+  }
   return (
     <StyledWrapper {...props}>
-      <div>전체 인원 : {allUser}</div>
-      {roomState === undefined ? (
+      <div>전체 인원 : {serverData.allUserCount}</div>
+      {!roomState ? (
         <div>방을 선택해주세요</div>
       ) : (
         <div>
@@ -20,7 +26,7 @@ const RoomList = ({
         </div>
       )}
       <div>
-        {roomList.map((room, index) => (
+        {serverData.createdRoom.map((room, index) => (
           <div key={room + index}>
             <StyledButton
               value={index}
