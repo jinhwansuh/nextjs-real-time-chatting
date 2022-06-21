@@ -10,10 +10,14 @@ const RoomList = ({
   handleRoomChange,
   ...props
 }: RoomListProps) => {
-  console.log(roomState);
   return (
     <StyledWrapper {...props}>
-      {roomState === undefined && <div>방을 선택해주세요</div>}
+      <div>전체 인원 : {allUser}</div>
+      {roomState === undefined ? (
+        <div>방을 선택해주세요</div>
+      ) : (
+        <div>{roomState}번 방 인원 5</div>
+      )}
       <div>
         <div>
           <StyledButton
