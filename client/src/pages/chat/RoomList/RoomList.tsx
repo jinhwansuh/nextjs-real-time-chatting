@@ -20,29 +20,16 @@ const RoomList = ({
         </div>
       )}
       <div>
-        <div>
-          <StyledButton
-            value={0}
-            onClick={(e) => handleRoomChange(e.currentTarget.value)}
-          >
-            room0
-          </StyledButton>
-        </div>
-        <div>
-          <StyledButton
-            value={1}
-            onClick={(e) => handleRoomChange(e.currentTarget.value)}
-          >
-            room1
-          </StyledButton>
-          <div></div>
-          <StyledButton
-            value={2}
-            onClick={(e) => handleRoomChange(e.currentTarget.value)}
-          >
-            room2
-          </StyledButton>
-        </div>
+        {roomList.map((room, index) => (
+          <div key={room + index}>
+            <StyledButton
+              value={index}
+              onClick={(e) => handleRoomChange(e.currentTarget.value)}
+            >
+              {room}
+            </StyledButton>
+          </div>
+        ))}
       </div>
     </StyledWrapper>
   );
