@@ -7,20 +7,26 @@ function ChattingArea({
   handleChatSubmit,
   chatInputState,
   setChatInputState,
+  mySocketId,
   ...props
 }: ChattingAreaProps) {
   return (
     <StyledContainer {...props} ref={containerRef}>
       <StyledEmailWrapper>
-        {chatList?.map((chat, index) => (
-          <li key={chat.name + index}>
-            {chat.name} : {chat.message}
-          </li>
-        ))}
+        {chatList?.map((chat, index) =>
+          mySocketId === chat.userSocketId ? (
+            <li key={chat.name + index}>
+              {chat.name} : {chat.message}
+            </li>
+          ) : (
+            <li key={chat.name + index}>
+              {chat.name} : {chat.message}
+            </li>
+          )
+        )}
       </StyledEmailWrapper>
       <StyledForm onSubmit={handleChatSubmit}>
         <StyledTextArea
-          // onKeyPress={handleKeyPress}
           value={chatInputState}
           onChange={(e) => setChatInputState(e.target.value)}
         />
