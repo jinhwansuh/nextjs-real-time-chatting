@@ -1,17 +1,19 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
 import { user } from '../../atoms/user';
 
 const Layout = ({ children }: any) => {
   const [userState, setUserState] = useRecoilState(user);
   const [userName, setUserName] = useState('');
+  const uuid = useMemo(() => v4(), []);
 
   const handleUserName = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const inputUserName = userName.trim();
     if (inputUserName !== '') {
-      setUserState({ name: inputUserName });
+      setUserState({ name: inputUserName, userSocketId: uuid });
       setUserName('');
     }
   };
