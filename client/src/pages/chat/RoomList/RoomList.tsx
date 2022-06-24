@@ -18,7 +18,7 @@ const RoomList = ({
   return (
     <StyledWrapper {...props}>
       <div>전체 인원 : {serverData.allUserCount}</div>
-      {!roomState ? (
+      {roomState === undefined ? (
         <div>방을 선택해주세요</div>
       ) : (
         <div>
