@@ -3,6 +3,11 @@ import { CSSProperties } from 'styled-components';
 
 export type ServerRoomList = string[];
 
+export interface UserAtom {
+  name: string;
+  userSocketId: string;
+}
+
 export interface ServerToClientInitData {
   allUserCount: number;
   createdRoom: ServerRoomList;
@@ -12,6 +17,7 @@ export interface Message {
   name: string;
   message: string;
   roomNumber: number;
+  userSocketId: UserAtom['userSocketId'];
 }
 
 export interface ServerToClientData extends Message {
@@ -30,6 +36,7 @@ export interface RoomListProps extends Props {
 }
 
 export interface ChattingAreaProps extends Props {
+  mySocketId: UserAtom['userSocketId'];
   chatInputState: string;
   containerRef: RefObject<HTMLDivElement>;
   chatList: Message[];
