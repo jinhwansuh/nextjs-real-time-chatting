@@ -33,13 +33,14 @@ let room: ServerRoomList = ['room0', 'room1', 'room2'];
 // ];
 
 io.on('connection', (socket) => {
-  console.log('someone connected Index');
+  console.log('someone connected Index', socket.id);
 
   const clientsCount = io.engine.clientsCount; // 전체 유저
 
   io.emit('welcome', {
     allUserCount: clientsCount,
     createdRoom: room,
+    userSocketId: socket.id,
   } as ServerToClientInitData);
 
   socket.on('joinRoom', (data: Message) => {
@@ -67,7 +68,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('someone disconnected');
+    console.log('someone disconnected', socket.id);
     const clientsCount = io.engine.clientsCount; // 전체 유저
     io.emit('leavePage', clientsCount);
   });
