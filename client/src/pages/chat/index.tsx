@@ -42,7 +42,9 @@ const Chat: NextPageWithLayout = () => {
       setChatListState((prev) => [
         ...prev,
         {
-          ...data,
+          userSocketId: data.userSocketId,
+          name: data.name,
+          roomNumber: data.roomNumber,
           message: `${data.roomNumber}번 방을 퇴장하셨습니다.`,
         },
       ]);
@@ -53,7 +55,9 @@ const Chat: NextPageWithLayout = () => {
       setChatListState((prev) => [
         ...prev,
         {
-          ...data,
+          userSocketId: data.userSocketId,
+          name: data.name,
+          roomNumber: data.roomNumber,
           message: `${data.roomNumber}번 방에 입장하셨습니다.`,
         },
       ]);
