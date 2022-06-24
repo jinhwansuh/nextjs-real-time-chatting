@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { user } from '../../atoms/user';
 import Layout from '../../components/layout';
@@ -20,7 +20,7 @@ const Chat: NextPageWithLayout = () => {
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const [roomState, setRoomState] = useState<number>();
   const [chatInputState, setChatInputState] = useState('');
-  const userState = useRecoilValue(user);
+  const [userState, setUserState] = useRecoilState(user);
 
   useEffect(() => {
     const socket = io(`http://localhost:8000`, {
@@ -42,8 +42,7 @@ const Chat: NextPageWithLayout = () => {
       setChatListState((prev) => [
         ...prev,
         {
-          name: data.name,
-          roomNumber: data.roomNumber,
+          ...data,
           message: `${data.roomNumber}번 방을 퇴장하셨습니다.`,
         },
       ]);
@@ -54,8 +53,7 @@ const Chat: NextPageWithLayout = () => {
       setChatListState((prev) => [
         ...prev,
         {
-          name: data.name,
-          roomNumber: data.roomNumber,
+          ...data,
           message: `${data.roomNumber}번 방에 입장하셨습니다.`,
         },
       ]);
@@ -72,6 +70,7 @@ const Chat: NextPageWithLayout = () => {
     });
 
     return () => {
+      socket.emit('leavePage', {});
       socket.close();
     };
   }, []);
@@ -86,14 +85,16 @@ const Chat: NextPageWithLayout = () => {
       setRoomState(roomNumber);
       setChatListState([]);
       setClientInCurrentRoom(0);
-      if (roomState! >= 0)
+      if (roomState !== undefined)
         currentSocket?.emit('leaveRoom', {
           roomNumber: roomState,
           name: userState.name,
+          userSocketId: userState.userSocketId,
         });
       currentSocket?.emit('joinRoom', {
         roomNumber: roomNumber,
         name: userState.name,
+        userSocketId: userState.userSocketId,
       });
     }
   };
@@ -104,6 +105,7 @@ const Chat: NextPageWithLayout = () => {
       name: userState.name,
       roomNumber: roomState,
       message: chatInputState,
+      userSocketId: userState.userSocketId,
     } as Message);
     setChatInputState('');
   };
@@ -117,6 +119,7 @@ const Chat: NextPageWithLayout = () => {
         handleRoomChange={handleRoomChange}
       />
       <ChattingArea
+        mySocketId={userState.userSocketId}
         chatList={chatListState}
         containerRef={containerRef}
         handleChatSubmit={handleChatSubmit}
