@@ -40,7 +40,6 @@ io.on('connection', (socket) => {
   io.emit('welcome', {
     allUserCount: clientsCount,
     createdRoom: room,
-    userSocketId: socket.id,
   } as ServerToClientInitData);
 
   socket.on('joinRoom', (data: Message) => {
