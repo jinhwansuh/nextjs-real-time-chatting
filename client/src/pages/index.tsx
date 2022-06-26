@@ -19,7 +19,10 @@ const Home: NextPageWithLayout = () => {
         <StyledTitle>Try Real Time App</StyledTitle>
         <CardWrapper>
           <Link href="/chat">
-            <Card>Real time chat</Card>
+            <Card>Real Time Chat</Card>
+          </Link>
+          <Link href="/live">
+            <Card>Live Streaming</Card>
           </Link>
         </CardWrapper>
       </StyledContainer>
