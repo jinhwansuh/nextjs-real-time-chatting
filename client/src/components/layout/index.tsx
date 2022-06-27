@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
@@ -9,11 +9,17 @@ const Layout = ({ children }: any) => {
   const [userName, setUserName] = useState('');
   const uuid = useMemo(() => v4(), []);
 
+  useEffect(() => {
+    const storedName = sessionStorage.getItem('test--name');
+    storedName && setUserState({ name: storedName, userSocketId: uuid });
+  }, []);
+
   const handleUserName = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const inputUserName = userName.trim();
     if (inputUserName !== '') {
       setUserState({ name: inputUserName, userSocketId: uuid });
+      sessionStorage.setItem('test--name', inputUserName);
       setUserName('');
     }
   };
