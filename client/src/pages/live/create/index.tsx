@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { VideoEventActions } from '../../../types/constants';
 
 const Create = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -17,11 +17,11 @@ const Create = () => {
 
     setCurrentSocket(socket);
 
-    socket.on('answer', (id, description) => {
+    socket.on(VideoEventActions.ANSWER, (id, description) => {
       peerConnections[id].setRemoteDescription(description);
     });
 
-    socket.on('watcher', (id) => {
+    socket.on(VideoEventActions.WATCHER, (id) => {
       const peerConnection = new RTCPeerConnection(config);
       peerConnections[id] = peerConnection;
       let stream = videoRef.current!.srcObject;
@@ -33,7 +33,7 @@ const Create = () => {
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit('candidate', id, event.candidate);
+          socket.emit(VideoEventActions.CANDIDATE, id, event.candidate);
         }
       };
 
@@ -41,15 +41,19 @@ const Create = () => {
         .createOffer()
         .then((sdp) => peerConnection.setLocalDescription(sdp))
         .then(() => {
-          socket.emit('offer', id, peerConnection.localDescription);
+          socket.emit(
+            VideoEventActions.OFFER,
+            id,
+            peerConnection.localDescription
+          );
         });
     });
 
-    socket.on('candidate', (id, candidate) => {
+    socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
       peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
     });
 
-    socket.on('disconnectPeer', (id) => {
+    socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
       peerConnections[id].close();
       delete peerConnections[id];
     });
@@ -93,7 +97,7 @@ const Create = () => {
 
   const handleStartStreaming = () => {
     console.log(currentSocket);
-    currentSocket?.emit('broadcaster');
+    currentSocket?.emit(VideoEventActions.BROADCASTER);
   };
 
   return (

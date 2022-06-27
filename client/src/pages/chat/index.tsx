@@ -9,6 +9,7 @@ import {
   ServerToClientData,
   ServerToClientInitData,
 } from '../../types/chat';
+import { ChatEventActions } from '../../types/constants';
 import type { NextPageWithLayout } from '../_app';
 import { RoomList, ChattingArea, Main } from './index.styled';
 
@@ -27,17 +28,17 @@ const Chat: NextPageWithLayout = () => {
       transports: ['websocket'],
     });
 
-    socket.on('welcome', (data: ServerToClientInitData) => {
+    socket.on(ChatEventActions.WELCOME, (data: ServerToClientInitData) => {
       setServerState({ ...data });
     });
 
     setCurrentSocket(socket);
 
-    socket.on('chat-message', (data: Message) => {
+    socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
       setChatListState((prev) => [...prev, data]);
     });
 
-    socket.on('leaveRoom', (data: ServerToClientData) => {
+    socket.on(ChatEventActions.LEAVE_ROOM, (data: ServerToClientData) => {
       setClientInCurrentRoom((prev) => prev - 1);
       setChatListState((prev) => [
         ...prev,
@@ -50,7 +51,7 @@ const Chat: NextPageWithLayout = () => {
       ]);
     });
 
-    socket.on('joinRoom', (data: ServerToClientData) => {
+    socket.on(ChatEventActions.JOIN_ROOM, (data: ServerToClientData) => {
       setClientInCurrentRoom(data.clientsInRoom);
       setChatListState((prev) => [
         ...prev,
@@ -63,7 +64,7 @@ const Chat: NextPageWithLayout = () => {
       ]);
     });
 
-    socket.on('leavePage', (data: number) => {
+    socket.on(ChatEventActions.LEAVE_PAGE, (data: number) => {
       setServerState(
         (prev) =>
           ({
@@ -74,7 +75,7 @@ const Chat: NextPageWithLayout = () => {
     });
 
     return () => {
-      socket.emit('leavePage', {});
+      socket.emit(ChatEventActions.LEAVE_PAGE, {});
       socket.close();
     };
   }, []);
@@ -90,12 +91,12 @@ const Chat: NextPageWithLayout = () => {
       setChatListState([]);
       setClientInCurrentRoom(0);
       if (roomState !== undefined)
-        currentSocket?.emit('leaveRoom', {
+        currentSocket?.emit(ChatEventActions.LEAVE_ROOM, {
           roomNumber: roomState,
           name: userState.name,
           userSocketId: userState.userSocketId,
         });
-      currentSocket?.emit('joinRoom', {
+      currentSocket?.emit(ChatEventActions.JOIN_ROOM, {
         roomNumber: roomNumber,
         name: userState.name,
         userSocketId: userState.userSocketId,
@@ -105,7 +106,7 @@ const Chat: NextPageWithLayout = () => {
 
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    currentSocket?.emit('chat-message', {
+    currentSocket?.emit(ChatEventActions.CHAT_MESSAGE, {
       name: userState.name,
       roomNumber: roomState,
       message: chatInputState,

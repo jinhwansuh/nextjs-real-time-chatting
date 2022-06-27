@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { VideoEventActions } from '../../types/constants';
 
 const Live: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -19,38 +20,42 @@ const Live: NextPage = () => {
     const socket = io(`http://localhost:8000`);
 
     socket.on('connect', () => {
-      socket.emit('watcher');
+      socket.emit(VideoEventActions.WATCHER);
     });
 
     setCurrentSocket(socket);
 
-    socket.on('offer', (id, description) => {
+    socket.on(VideoEventActions.OFFER, (id, description) => {
       peerConnection = new RTCPeerConnection(config);
       peerConnection
         .setRemoteDescription(description)
         .then(() => peerConnection.createAnswer())
         .then((sdp) => peerConnection.setLocalDescription(sdp))
         .then(() => {
-          socket.emit('answer', id, peerConnection.localDescription);
+          socket.emit(
+            VideoEventActions.ANSWER,
+            id,
+            peerConnection.localDescription
+          );
         });
       peerConnection.ontrack = (event: any) => {
         setStreamState(event.streams[0]);
       };
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit('candidate', id, event.candidate);
+          socket.emit(VideoEventActions.CANDIDATE, id, event.candidate);
         }
       };
     });
 
-    socket.on('candidate', (id, candidate) => {
+    socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
       peerConnection
         .addIceCandidate(new RTCIceCandidate(candidate))
         .catch((e) => console.error(e));
     });
 
-    socket.on('broadcaster', () => {
-      socket.emit('watcher');
+    socket.on(VideoEventActions.BROADCASTER, () => {
+      socket.emit(VideoEventActions.WATCHER);
     });
 
     return () => {
