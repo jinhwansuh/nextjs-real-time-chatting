@@ -1,7 +1,10 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import { ChatEventTypes, VideoEventTypes } from '../client/src/types/constants';
+import {
+  ChatEventActions,
+  VideoEventActions,
+} from '../client/src/types/constants';
 import {
   Message,
   ServerRoomList,
@@ -54,59 +57,59 @@ io.on('connection', (socket) => {
   // chatting
   const clientsCount = io.engine.clientsCount;
 
-  io.emit(ChatEventTypes.welcome, {
+  io.emit(ChatEventActions.WELCOME, {
     allUserCount: clientsCount,
     createdRoom: room,
   } as ServerToClientInitData);
 
-  socket.on(ChatEventTypes.joinRoom, (data: Message) => {
+  socket.on(ChatEventActions.JOIN_ROOM, (data: Message) => {
     const num = data.roomNumber;
     socket.join(room[num]);
 
     const clientsInRoom = io.sockets.adapter.rooms.get(room[num])?.size || 0; // 방 유저
     const serverToClientData: ServerToClientData = { ...data, clientsInRoom };
 
-    socket.to(room[num]).emit(ChatEventTypes.joinRoom, serverToClientData);
+    socket.to(room[num]).emit(ChatEventActions.JOIN_ROOM, serverToClientData);
   });
 
-  socket.on(ChatEventTypes.leaveRoom, (data: Message) => {
+  socket.on(ChatEventActions.LEAVE_ROOM, (data: Message) => {
     const num = data.roomNumber;
     socket.leave(room[num]);
 
     const clientsInRoom = io.sockets.adapter.rooms.get(room[num])?.size || 0;
     const serverToClientData: ServerToClientData = { ...data, clientsInRoom };
-    io.to(room[num]).emit(ChatEventTypes.leaveRoom, serverToClientData);
+    io.to(room[num]).emit(ChatEventActions.LEAVE_ROOM, serverToClientData);
   });
 
-  socket.on(ChatEventTypes['chat-message'], (data: Message) => {
+  socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
     const num = data.roomNumber;
-    io.to(room[num]).emit(ChatEventTypes['chat-message'], data);
+    io.to(room[num]).emit(ChatEventActions.CHAT_MESSAGE, data);
   });
 
   socket.on('disconnect', () => {
     console.log('someone disconnected', socket.id);
     const clientsCount = io.engine.clientsCount;
-    io.emit('leavePage', clientsCount);
-    socket.to(broadcaster).emit('disconnectPeer', socket.id);
+    io.emit(ChatEventActions.LEAVE_PAGE, clientsCount);
+    socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
   });
 
   // live streaming
 
-  socket.on(VideoEventTypes.broadcaster, () => {
+  socket.on(VideoEventActions.BROADCASTER, () => {
     broadcaster = socket.id;
-    socket.broadcast.emit(VideoEventTypes.broadcaster);
+    socket.broadcast.emit(VideoEventActions.BROADCASTER);
   });
-  socket.on(VideoEventTypes.watcher, () => {
-    socket.to(broadcaster).emit(VideoEventTypes.watcher, socket.id);
+  socket.on(VideoEventActions.WATCHER, () => {
+    socket.to(broadcaster).emit(VideoEventActions.WATCHER, socket.id);
   });
-  socket.on(VideoEventTypes.offer, (id, message) => {
-    socket.to(id).emit(VideoEventTypes.offer, socket.id, message);
+  socket.on(VideoEventActions.OFFER, (id, message) => {
+    socket.to(id).emit(VideoEventActions.OFFER, socket.id, message);
   });
-  socket.on(VideoEventTypes.answer, (id, message) => {
-    socket.to(id).emit(VideoEventTypes.answer, socket.id, message);
+  socket.on(VideoEventActions.ANSWER, (id, message) => {
+    socket.to(id).emit(VideoEventActions.ANSWER, socket.id, message);
   });
-  socket.on(VideoEventTypes.candidate, (id, message) => {
-    socket.to(id).emit(VideoEventTypes.candidate, socket.id, message);
+  socket.on(VideoEventActions.CANDIDATE, (id, message) => {
+    socket.to(id).emit(VideoEventActions.CANDIDATE, socket.id, message);
   });
 });
 
