@@ -1,14 +1,16 @@
-export const ChatEventTypes = {
-  welcome: 'welcome',
-  joinRoom: 'joinRoom',
-  leaveRoom: 'leaveRoom',
-  'chat-message': 'chat-message',
+export const ChatEventActions = {
+  WELCOME: 'welcome',
+  JOIN_ROOM: 'joinRoom',
+  LEAVE_ROOM: 'leaveRoom',
+  CHAT_MESSAGE: 'chatMessage',
+  LEAVE_PAGE: 'leavePage',
 } as const;
 
-export const VideoEventTypes = {
-  broadcaster: 'broadcaster',
-  watcher: 'watcher',
-  offer: 'offer',
-  answer: 'answer',
-  candidate: 'candidate',
+export const VideoEventActions = {
+  BROADCASTER: 'broadcaster',
+  WATCHER: 'watcher',
+  OFFER: 'offer',
+  ANSWER: 'answer',
+  CANDIDATE: 'candidate',
+  DISCONNECT_PEER: 'disconnectPeer',
 } as const;
