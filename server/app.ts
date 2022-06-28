@@ -31,7 +31,7 @@ let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
 /* 이런식으로 방의 형식 변경하기 
   const ChatRoomList = [
     {
-      index: 0,
+      _id: uuid
       roomName: 'room1',
       roomUser: [],
     },
@@ -41,6 +41,7 @@ let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
 /* 
   const VideoRoomList = [
     {
+      _id: uuid
       streamer: 'john Doe - id',
       roomName: 'john Room',
       roomUser: []
@@ -51,10 +52,13 @@ let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
 const videoMap = {};
 let broadcaster: string = '';
 
-io.on('connection', (socket) => {
-  console.log('someone connected Index', socket.id);
+const chattingNamespace = io.of('/chat');
+const streamingNamespace = io.of('/streaming');
 
-  // chatting
+// chatting
+chattingNamespace.on('connection', (socket) => {
+  console.log('someone connected chattingChannel', socket.id);
+
   const clientsCount = io.engine.clientsCount;
 
   io.emit(ChatEventActions.WELCOME, {
@@ -87,13 +91,15 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('someone disconnected', socket.id);
+    console.log('someone disconnected chattingChannel', socket.id);
     const clientsCount = io.engine.clientsCount;
     io.emit(ChatEventActions.LEAVE_PAGE, clientsCount);
-    socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
   });
+});
 
-  // live streaming
+// live streaming
+streamingNamespace.on('connection', (socket) => {
+  console.log('someone connected streamingChannel', socket.id);
 
   socket.on(VideoEventActions.BROADCASTER, () => {
     broadcaster = socket.id;
@@ -110,6 +116,11 @@ io.on('connection', (socket) => {
   });
   socket.on(VideoEventActions.CANDIDATE, (id, message) => {
     socket.to(id).emit(VideoEventActions.CANDIDATE, socket.id, message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('someone disconnected streamingChannel', socket.id);
+    socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
   });
 });
 
