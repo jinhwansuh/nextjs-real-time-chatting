@@ -48,52 +48,74 @@ let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
     }
   ]
 */
-
 const videoMap = {};
 let broadcaster: string = '';
 
-const chattingNamespace = io.of('/chat');
+const chattingNamespace = io.of('/chatting');
 const streamingNamespace = io.of('/streaming');
 
 // chatting
 chattingNamespace.on('connection', (socket) => {
+  const currentNameSpace = socket.nsp;
+
   console.log('someone connected chattingChannel', socket.id);
 
   const clientsCount = io.engine.clientsCount;
 
-  io.emit(ChatEventActions.WELCOME, {
+  socket.emit(ChatEventActions.WELCOME, {
     allUserCount: clientsCount,
     createdRoom: room,
   } as ServerToClientInitData);
 
-  socket.on(ChatEventActions.JOIN_ROOM, (data: Message) => {
+  socket.on(ChatEventActions.JOIN_ROOM, async (data: Message) => {
     const num = data.roomNumber;
     socket.join(room[num]);
 
-    const clientsInRoom = io.sockets.adapter.rooms.get(room[num])?.size || 0; // 방 유저
-    const serverToClientData: ServerToClientData = { ...data, clientsInRoom };
+    const clientsInRoom =
+      chattingNamespace.adapter.rooms.get(room[num])?.size || 0; // 방 유저
 
-    socket.to(room[num]).emit(ChatEventActions.JOIN_ROOM, serverToClientData);
+    const serverToClientData: ServerToClientData = {
+      ...data,
+      message: `${data.roomNumber}번 방에 입장하셨습니다.`,
+      clientsInRoom,
+    };
+
+    /* 
+      socket.to(room[num]).emit(ChatEventActions.JOIN_ROOM, serverToClientData); 
+      위 동작으로 하면 안되는 이유가 무엇인지 
+      problem: 자기 자신이 join 했을때 이벤트가 발생하지 않는다.
+      즉, 본인이 emit한 이벤트는 다시 on을 하지 않음 probably(broadcast 처럼?)
+    */
+    currentNameSpace
+      .to(room[num])
+      .emit(ChatEventActions.JOIN_ROOM, serverToClientData);
   });
 
   socket.on(ChatEventActions.LEAVE_ROOM, (data: Message) => {
     const num = data.roomNumber;
     socket.leave(room[num]);
 
-    const clientsInRoom = io.sockets.adapter.rooms.get(room[num])?.size || 0;
-    const serverToClientData: ServerToClientData = { ...data, clientsInRoom };
-    io.to(room[num]).emit(ChatEventActions.LEAVE_ROOM, serverToClientData);
+    const clientsInRoom =
+      chattingNamespace.adapter.rooms.get(room[num])?.size || 0;
+    const serverToClientData: ServerToClientData = {
+      ...data,
+      message: `${data.roomNumber}번 방을 퇴장하셨습니다.`,
+      clientsInRoom,
+    };
+    currentNameSpace
+      .to(room[num])
+      .emit(ChatEventActions.LEAVE_ROOM, serverToClientData);
   });
 
   socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
     const num = data.roomNumber;
-    io.to(room[num]).emit(ChatEventActions.CHAT_MESSAGE, data);
+    currentNameSpace.to(room[num]).emit(ChatEventActions.CHAT_MESSAGE, data);
   });
 
   socket.on('disconnect', () => {
     console.log('someone disconnected chattingChannel', socket.id);
     const clientsCount = io.engine.clientsCount;
-    io.emit(ChatEventActions.LEAVE_PAGE, clientsCount);
+    currentNameSpace.emit(ChatEventActions.LEAVE_PAGE, clientsCount);
   });
 });
 
