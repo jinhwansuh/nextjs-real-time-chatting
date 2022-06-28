@@ -24,7 +24,7 @@ const Chat: NextPageWithLayout = () => {
   const [userState, setUserState] = useRecoilState(user);
 
   useEffect(() => {
-    const socket = io(`http://localhost:8000/chat`, {
+    const socket = io(`http://localhost:8000/chatting`, {
       transports: ['websocket'],
     });
 
@@ -46,7 +46,7 @@ const Chat: NextPageWithLayout = () => {
           userSocketId: data.userSocketId,
           name: data.name,
           roomNumber: data.roomNumber,
-          message: `${data.roomNumber}번 방을 퇴장하셨습니다.`,
+          message: data.message,
         },
       ]);
     });
@@ -59,7 +59,7 @@ const Chat: NextPageWithLayout = () => {
           userSocketId: data.userSocketId,
           name: data.name,
           roomNumber: data.roomNumber,
-          message: `${data.roomNumber}번 방에 입장하셨습니다.`,
+          message: data.message,
         },
       ]);
     });
@@ -75,7 +75,7 @@ const Chat: NextPageWithLayout = () => {
     });
 
     return () => {
-      socket.emit(ChatEventActions.LEAVE_PAGE, {});
+      // socket.emit(ChatEventActions.LEAVE_PAGE, {});
       socket.close();
     };
   }, []);
@@ -89,7 +89,6 @@ const Chat: NextPageWithLayout = () => {
     if (roomState !== roomNumber) {
       setRoomState(roomNumber);
       setChatListState([]);
-      setClientInCurrentRoom(0);
       if (roomState !== undefined)
         currentSocket?.emit(ChatEventActions.LEAVE_ROOM, {
           roomNumber: roomState,
