@@ -49,7 +49,6 @@ let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
   ]
 */
 const videoMap = {};
-let broadcaster: string = '';
 
 const chattingNamespace = io.of('/chatting');
 const streamingNamespace = io.of('/streaming');
@@ -120,21 +119,31 @@ chattingNamespace.on('connection', (socket) => {
 });
 
 // live streaming
+
+let broadcasters: any = {};
+let broadcaster: string = '';
+
 streamingNamespace.on('connection', (socket) => {
   console.log('someone connected streamingChannel', socket.id);
 
-  socket.on(VideoEventActions.BROADCASTER, () => {
-    broadcaster = socket.id;
+  socket.on(VideoEventActions.BROADCASTER, (room) => {
+    broadcasters[room] = socket.id;
+    socket.join(room);
     socket.broadcast.emit(VideoEventActions.BROADCASTER);
   });
-  socket.on(VideoEventActions.WATCHER, () => {
-    socket.to(broadcaster).emit(VideoEventActions.WATCHER, socket.id);
+  socket.on(VideoEventActions.WATCHER, (user) => {
+    socket.join(user.room);
+    user.id = socket.id;
+    socket.to(broadcasters[user.room]).emit('new viewer', user);
   });
-  socket.on(VideoEventActions.OFFER, (id, message) => {
-    socket.to(id).emit(VideoEventActions.OFFER, socket.id, message);
+  socket.on(VideoEventActions.OFFER, (id, event) => {
+    event.broadcaster.id = socket.id;
+    socket.to(id).emit(VideoEventActions.OFFER, event.broadcaster, event.sdp);
   });
-  socket.on(VideoEventActions.ANSWER, (id, message) => {
-    socket.to(id).emit(VideoEventActions.ANSWER, socket.id, message);
+  socket.on(VideoEventActions.ANSWER, (event) => {
+    socket
+      .to(broadcasters[event.room])
+      .emit(VideoEventActions.ANSWER, socket.id, event.sdp);
   });
   socket.on(VideoEventActions.CANDIDATE, (id, message) => {
     socket.to(id).emit(VideoEventActions.CANDIDATE, socket.id, message);
@@ -142,7 +151,7 @@ streamingNamespace.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('someone disconnected streamingChannel', socket.id);
-    socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
+    // socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
   });
 });
 
