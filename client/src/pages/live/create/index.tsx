@@ -11,7 +11,7 @@ const Create = () => {
   const room = '123';
 
   useEffect(() => {
-    let peerConnections: { [id: string]: RTCPeerConnection } = {};
+    const peerConnections: { [id: string]: RTCPeerConnection } = {};
     const config = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     };
@@ -23,7 +23,7 @@ const Create = () => {
       peerConnections[id].setRemoteDescription(description);
     });
 
-    socket.on('new viewer', (viewer) => {
+    socket.on(VideoEventActions.WATCHER, (viewer) => {
       peerConnections[viewer.id] = new RTCPeerConnection(config);
 
       const stream = videoRef.current!.srcObject;
@@ -35,31 +35,30 @@ const Create = () => {
 
       peerConnections[viewer.id].onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit(VideoEventActions.CANDIDATE, viewer.id, {
-            type: 'candidate',
-            label: event.candidate.sdpMLineIndex,
-            id: event.candidate.sdpMid,
-            candidate: event.candidate.candidate,
-          });
+          socket.emit(VideoEventActions.CANDIDATE, viewer.id, event.candidate);
         }
       };
 
-      peerConnections[viewer.id].createOffer().then((sdp) => {
-        peerConnections[viewer.id].setLocalDescription(sdp);
-        socket.emit(VideoEventActions.OFFER, viewer.id, {
-          type: 'offer',
-          sdp: sdp,
-          broadcaster: {
-            name: 'hihi',
-            room,
-          },
+      peerConnections[viewer.id]
+        .createOffer()
+        .then((sdp) => peerConnections[viewer.id].setLocalDescription(sdp))
+        .then(() => {
+          socket.emit(
+            VideoEventActions.OFFER,
+            viewer.id,
+            peerConnections[viewer.id].localDescription
+          );
         });
-      });
     });
 
     socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
       peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
+      console.log(peerConnections);
     });
+    /* 
+      TODO:
+      연결이 끊어졌을때 peer삭제
+     */
 
     // socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
     //   peerConnections[id].close();

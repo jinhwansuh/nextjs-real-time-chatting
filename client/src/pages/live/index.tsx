@@ -7,13 +7,12 @@ import { VideoEventActions } from '../../types/constants';
 
 const Live: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
-  const [streamState, setStreamState] = useState<MediaStream>();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const room = '123';
 
   useEffect(() => {
-    let peerConnections: { [id: string]: RTCPeerConnection } = {};
+    let peerConnection: RTCPeerConnection;
 
     const config = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -27,46 +26,35 @@ const Live: NextPage = () => {
 
     setCurrentSocket(socket);
 
-    socket.on(VideoEventActions.OFFER, (broadcaster, description) => {
-      peerConnections[broadcaster.id] = new RTCPeerConnection(config);
-      peerConnections[broadcaster.id]
+    socket.on(VideoEventActions.OFFER, (id, description) => {
+      peerConnection = new RTCPeerConnection(config);
+      peerConnection
         .setRemoteDescription(description)
-        .then(() => peerConnections[broadcaster.id].createAnswer())
-        .then((sdp) => {
-          peerConnections[broadcaster.id].setLocalDescription(sdp);
-          socket.emit(VideoEventActions.ANSWER, {
-            type: 'answer',
-            sdp: sdp,
-            room: room,
-          });
+        .then(() => peerConnection.createAnswer())
+        .then((sdp) => peerConnection.setLocalDescription(sdp))
+        .then(() => {
+          socket.emit(
+            VideoEventActions.ANSWER,
+            id,
+            peerConnection.localDescription
+          );
         });
 
-      peerConnections[broadcaster.id].ontrack = (event: any) => {
-        // setStreamState(event.streams[0]);
+      peerConnection.ontrack = (event: any) => {
         videoRef.current!.srcObject = event.streams[0]
           ? event.streams[0]
           : null;
       };
-      peerConnections[broadcaster.id].onicecandidate = (event) => {
+      peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit(VideoEventActions.CANDIDATE, {
-            type: 'candidate',
-            label: event.candidate.sdpMLineIndex,
-            id: event.candidate.sdpMid,
-            candidate: event.candidate.candidate,
-          });
+          socket.emit(VideoEventActions.CANDIDATE, id, event.candidate);
         }
       };
     });
 
-    socket.on(VideoEventActions.CANDIDATE, (id, event) => {
-      peerConnections[id]
-        .addIceCandidate(
-          new RTCIceCandidate({
-            sdpMLineIndex: event.label,
-            candidate: event.candidate,
-          })
-        )
+    socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
+      peerConnection
+        .addIceCandidate(new RTCIceCandidate(candidate))
         .catch((e) => console.error(e));
     });
 
@@ -78,13 +66,6 @@ const Live: NextPage = () => {
       socket.close();
     };
   }, []);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      console.log(streamState);
-      videoRef.current.srcObject = streamState ? streamState : null;
-    }
-  }, [videoRef, streamState]);
 
   return (
     <>
