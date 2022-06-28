@@ -24,7 +24,7 @@ const Chat: NextPageWithLayout = () => {
   const [userState, setUserState] = useRecoilState(user);
 
   useEffect(() => {
-    const socket = io(`http://localhost:8000`, {
+    const socket = io(`http://localhost:8000/chat`, {
       transports: ['websocket'],
     });
 
