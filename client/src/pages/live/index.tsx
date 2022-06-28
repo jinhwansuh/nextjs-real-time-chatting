@@ -10,52 +10,68 @@ const Live: NextPage = () => {
   const [streamState, setStreamState] = useState<MediaStream>();
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const room = '123';
+
   useEffect(() => {
-    let peerConnection = {} as RTCPeerConnection;
+    let peerConnections: { [id: string]: RTCPeerConnection } = {};
 
     const config = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     };
 
-    const socket = io(`http://localhost:8000`);
+    const socket = io(`http://localhost:8000/streaming`);
 
     socket.on('connect', () => {
-      socket.emit(VideoEventActions.WATCHER);
+      socket.emit(VideoEventActions.WATCHER, { room });
     });
 
     setCurrentSocket(socket);
 
-    socket.on(VideoEventActions.OFFER, (id, description) => {
-      peerConnection = new RTCPeerConnection(config);
-      peerConnection
+    socket.on(VideoEventActions.OFFER, (broadcaster, description) => {
+      peerConnections[broadcaster.id] = new RTCPeerConnection(config);
+      peerConnections[broadcaster.id]
         .setRemoteDescription(description)
-        .then(() => peerConnection.createAnswer())
-        .then((sdp) => peerConnection.setLocalDescription(sdp))
-        .then(() => {
-          socket.emit(
-            VideoEventActions.ANSWER,
-            id,
-            peerConnection.localDescription
-          );
+        .then(() => peerConnections[broadcaster.id].createAnswer())
+        .then((sdp) => {
+          peerConnections[broadcaster.id].setLocalDescription(sdp);
+          socket.emit(VideoEventActions.ANSWER, {
+            type: 'answer',
+            sdp: sdp,
+            room: room,
+          });
         });
-      peerConnection.ontrack = (event: any) => {
-        setStreamState(event.streams[0]);
+
+      peerConnections[broadcaster.id].ontrack = (event: any) => {
+        // setStreamState(event.streams[0]);
+        videoRef.current!.srcObject = event.streams[0]
+          ? event.streams[0]
+          : null;
       };
-      peerConnection.onicecandidate = (event) => {
+      peerConnections[broadcaster.id].onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit(VideoEventActions.CANDIDATE, id, event.candidate);
+          socket.emit(VideoEventActions.CANDIDATE, {
+            type: 'candidate',
+            label: event.candidate.sdpMLineIndex,
+            id: event.candidate.sdpMid,
+            candidate: event.candidate.candidate,
+          });
         }
       };
     });
 
-    socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
-      peerConnection
-        .addIceCandidate(new RTCIceCandidate(candidate))
+    socket.on(VideoEventActions.CANDIDATE, (id, event) => {
+      peerConnections[id]
+        .addIceCandidate(
+          new RTCIceCandidate({
+            sdpMLineIndex: event.label,
+            candidate: event.candidate,
+          })
+        )
         .catch((e) => console.error(e));
     });
 
     socket.on(VideoEventActions.BROADCASTER, () => {
-      socket.emit(VideoEventActions.WATCHER);
+      socket.emit(VideoEventActions.WATCHER, { room });
     });
 
     return () => {
@@ -68,13 +84,13 @@ const Live: NextPage = () => {
       console.log(streamState);
       videoRef.current.srcObject = streamState ? streamState : null;
     }
-  }, [streamState]);
+  }, [videoRef, streamState]);
 
   return (
     <>
       <div>현재 방송들 : 222개</div>
       <div>
-        <StyledVideo ref={videoRef} autoPlay playsInline />
+        <StyledVideo ref={videoRef} autoPlay playsInline muted />
       </div>
       <Link href="live/create">
         <div>방송 생성하기</div>
