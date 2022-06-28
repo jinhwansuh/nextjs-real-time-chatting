@@ -1,19 +1,21 @@
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
 import { VideoEventActions } from '../../../types/constants';
 
 const Create = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [streamState, setStreamState] = useState<MediaStream>();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const room = '123';
 
   useEffect(() => {
-    let peerConnections: any = {};
+    let peerConnections: { [id: string]: RTCPeerConnection } = {};
     const config = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     };
-    const socket = io(`http://localhost:8000`);
+    const socket = io(`http://localhost:8000/streaming`);
 
     setCurrentSocket(socket);
 
@@ -21,42 +23,48 @@ const Create = () => {
       peerConnections[id].setRemoteDescription(description);
     });
 
-    socket.on(VideoEventActions.WATCHER, (id) => {
-      const peerConnection = new RTCPeerConnection(config);
-      peerConnections[id] = peerConnection;
-      let stream = videoRef.current!.srcObject;
+    socket.on('new viewer', (viewer) => {
+      peerConnections[viewer.id] = new RTCPeerConnection(config);
+
+      const stream = videoRef.current!.srcObject;
       (stream as MediaStream)
         .getTracks()
         .forEach((track) =>
-          peerConnection.addTrack(track, stream as MediaStream)
+          peerConnections[viewer.id].addTrack(track, stream as MediaStream)
         );
 
-      peerConnection.onicecandidate = (event) => {
+      peerConnections[viewer.id].onicecandidate = (event) => {
         if (event.candidate) {
-          socket.emit(VideoEventActions.CANDIDATE, id, event.candidate);
+          socket.emit(VideoEventActions.CANDIDATE, viewer.id, {
+            type: 'candidate',
+            label: event.candidate.sdpMLineIndex,
+            id: event.candidate.sdpMid,
+            candidate: event.candidate.candidate,
+          });
         }
       };
 
-      peerConnection
-        .createOffer()
-        .then((sdp) => peerConnection.setLocalDescription(sdp))
-        .then(() => {
-          socket.emit(
-            VideoEventActions.OFFER,
-            id,
-            peerConnection.localDescription
-          );
+      peerConnections[viewer.id].createOffer().then((sdp) => {
+        peerConnections[viewer.id].setLocalDescription(sdp);
+        socket.emit(VideoEventActions.OFFER, viewer.id, {
+          type: 'offer',
+          sdp: sdp,
+          broadcaster: {
+            name: 'hihi',
+            room,
+          },
         });
+      });
     });
 
     socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
       peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
     });
 
-    socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
-      peerConnections[id].close();
-      delete peerConnections[id];
-    });
+    // socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
+    //   peerConnections[id].close();
+    //   delete peerConnections[id];
+    // });
 
     return () => {
       socket.close();
@@ -96,9 +104,14 @@ const Create = () => {
   };
 
   const handleStartStreaming = () => {
-    console.log(currentSocket);
-    currentSocket?.emit(VideoEventActions.BROADCASTER);
+    currentSocket?.emit(VideoEventActions.BROADCASTER, room);
   };
+
+  /* 
+    TODO:
+    1. 공유 중지를 눌렀을 때, 이벤트
+    2. 화면이 꺼졌을 때 이벤트
+  */
 
   return (
     <>
