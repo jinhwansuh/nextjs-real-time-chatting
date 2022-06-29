@@ -18,21 +18,28 @@ const RoomList = ({
   return (
     <StyledWrapper {...props}>
       <div>전체 인원 : {serverData.allUserCount}</div>
-      {roomState === undefined ? (
-        <div>방을 선택해주세요</div>
+      {roomState.name === '' ? (
+        <div>
+          <strong>방을 선택해주세요</strong>
+        </div>
       ) : (
         <div>
-          {roomState}번 방 인원 {clientInRoom}
+          <strong>{roomState.name}</strong> 방 인원 {clientInRoom}
         </div>
       )}
       <div>
         {serverData.createdRoom.map((room, index) => (
-          <div key={room + index}>
+          <div key={room._id}>
             <StyledButton
               value={index}
-              onClick={(e) => handleRoomChange(e.currentTarget.value)}
+              onClick={() =>
+                handleRoomChange({
+                  id: room._id,
+                  name: room.roomName,
+                })
+              }
             >
-              {room}
+              {room.roomName}
             </StyledButton>
           </div>
         ))}

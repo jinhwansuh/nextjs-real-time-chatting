@@ -6,6 +6,7 @@ import { user } from '../../atoms/user';
 import Layout from '../../components/layout';
 import {
   Message,
+  RoomState,
   ServerToClientData,
   ServerToClientInitData,
 } from '../../types/chat';
@@ -19,7 +20,10 @@ const Chat: NextPageWithLayout = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [clientInCurrentRoom, setClientInCurrentRoom] = useState(0);
   const [chatListState, setChatListState] = useState<Message[]>([]);
-  const [roomState, setRoomState] = useState<number>();
+  const [roomState, setRoomState] = useState<RoomState>({
+    id: '',
+    name: '',
+  });
   const [chatInputState, setChatInputState] = useState('');
   const [userState, setUserState] = useRecoilState(user);
 
@@ -45,7 +49,7 @@ const Chat: NextPageWithLayout = () => {
         {
           userSocketId: data.userSocketId,
           name: data.name,
-          roomNumber: data.roomNumber,
+          roomId: data.roomId,
           message: data.message,
         },
       ]);
@@ -58,7 +62,7 @@ const Chat: NextPageWithLayout = () => {
         {
           userSocketId: data.userSocketId,
           name: data.name,
-          roomNumber: data.roomNumber,
+          roomId: data.roomId,
           message: data.message,
         },
       ]);
@@ -84,19 +88,18 @@ const Chat: NextPageWithLayout = () => {
     containerRef.current?.scrollTo(0, containerRef.current.scrollHeight);
   }, [chatListState]);
 
-  const handleRoomChange = (number: string) => {
-    const roomNumber = Number(number);
-    if (roomState !== roomNumber) {
-      setRoomState(roomNumber);
+  const handleRoomChange = (room: RoomState) => {
+    if (roomState.id !== room.id) {
+      setRoomState(room);
       setChatListState([]);
       if (roomState !== undefined)
         currentSocket?.emit(ChatEventActions.LEAVE_ROOM, {
-          roomNumber: roomState,
+          roomId: roomState.id,
           name: userState.name,
           userSocketId: userState.userSocketId,
         });
       currentSocket?.emit(ChatEventActions.JOIN_ROOM, {
-        roomNumber: roomNumber,
+        roomId: room.id,
         name: userState.name,
         userSocketId: userState.userSocketId,
       });
@@ -107,7 +110,7 @@ const Chat: NextPageWithLayout = () => {
     e.preventDefault();
     currentSocket?.emit(ChatEventActions.CHAT_MESSAGE, {
       name: userState.name,
-      roomNumber: roomState,
+      roomId: roomState.id,
       message: chatInputState,
       userSocketId: userState.userSocketId,
     } as Message);
