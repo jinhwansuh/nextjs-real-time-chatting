@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { Video } from '../../components/domain';
 import { VideoEventActions } from '../../types/constants';
 
 const Live: NextPage = () => {
@@ -71,7 +72,7 @@ const Live: NextPage = () => {
     <>
       <div>현재 방송들 : 222개</div>
       <div>
-        <StyledVideo ref={videoRef} autoPlay playsInline muted />
+        <Video videoRef={videoRef} autoPlay playsInline muted />
       </div>
       <Link href="live/create">
         <div>방송 생성하기</div>
@@ -79,10 +80,5 @@ const Live: NextPage = () => {
     </>
   );
 };
-
-const StyledVideo = styled.video`
-  width: 80%;
-  height: 400px;
-`;
 
 export default Live;

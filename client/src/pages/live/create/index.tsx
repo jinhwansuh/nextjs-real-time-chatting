@@ -2,6 +2,7 @@ import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
+import { Video } from '../../../components/domain';
 import { VideoEventActions } from '../../../types/constants';
 
 const Create = () => {
@@ -114,7 +115,7 @@ const Create = () => {
 
   return (
     <>
-      <StyledVideo ref={videoRef} autoPlay />
+      <Video videoRef={videoRef} autoPlay />
       <div>
         <button onClick={handleVideoClick}>비디오 연결하기</button>
         <button onClick={handleDisplayClick}>화면 공유하기</button>
@@ -123,10 +124,5 @@ const Create = () => {
     </>
   );
 };
-
-const StyledVideo = styled.video`
-  width: 80%;
-  height: 400px;
-`;
 
 export default Create;
