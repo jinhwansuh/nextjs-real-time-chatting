@@ -9,9 +9,10 @@ const StreamingRoom: NextPage = () => {
   const router = useRouter();
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { roomId } = router.query;
 
   useEffect(() => {
-    const room = router.pathname.split('/')[2];
+    if (!roomId) return;
     let peerConnection: RTCPeerConnection;
 
     const config = {
@@ -21,7 +22,7 @@ const StreamingRoom: NextPage = () => {
     const socket = io(`http://localhost:8000/streaming`);
 
     socket.on('connect', () => {
-      socket.emit(VideoEventActions.WATCHER, { room });
+      socket.emit(VideoEventActions.WATCHER, { roomId });
     });
 
     setCurrentSocket(socket);
@@ -59,13 +60,13 @@ const StreamingRoom: NextPage = () => {
     });
 
     socket.on(VideoEventActions.BROADCASTER, () => {
-      socket.emit(VideoEventActions.WATCHER, { room });
+      socket.emit(VideoEventActions.WATCHER, { roomId });
     });
 
     return () => {
       socket.close();
     };
-  }, []);
+  }, [roomId]);
 
   return (
     <>
