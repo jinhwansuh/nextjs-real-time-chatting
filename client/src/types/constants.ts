@@ -7,6 +7,7 @@ export const ChatEventActions = {
 } as const;
 
 export const VideoEventActions = {
+  WELCOME: 'welcome',
   BROADCASTER: 'broadcaster',
   WATCHER: 'watcher',
   OFFER: 'offer',

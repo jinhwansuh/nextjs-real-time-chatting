@@ -1,4 +1,5 @@
 import { ServerChatRoom } from '../../../client/src/types/chat';
+import { ServerStreamingRoom } from '../../../client/src/types/streaming';
 
 export const chatRoomList: ServerChatRoom[] = [
   {
@@ -18,4 +19,11 @@ export const chatRoomList: ServerChatRoom[] = [
   },
 ];
 
-export const videoRoomList = [];
+export const streamingRoomList: ServerStreamingRoom[] = [
+  {
+    _id: 'desire',
+    streamer: 'jin',
+    roomName: 'ma first Stream',
+    roomUser: [],
+  },
+];

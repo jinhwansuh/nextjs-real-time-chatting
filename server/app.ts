@@ -11,7 +11,7 @@ import {
   ServerToClientData,
   ServerToClientInitData,
 } from '../client/src/types/chat';
-import { chatRoomList } from './src/utils/room';
+import { chatRoomList, streamingRoomList } from './src/utils/room';
 
 const app = express();
 const server = http.createServer(app);
@@ -31,15 +31,6 @@ const chattingNamespace = io.of('/chatting');
 const streamingNamespace = io.of('/streaming');
 
 // chatting
-/* 
-  const chatRoomList = [
-    {
-      _id: uuid
-      roomName: 'room1',
-      roomUser: [],
-    },
-  ]; 
-*/
 
 const findTargetRoom = (roomList: ServerChatRoom[], id: string) => {
   return roomList.find((room) => room._id === id);
@@ -52,7 +43,7 @@ chattingNamespace.on('connection', (socket) => {
 
   const clientsCount = io.engine.clientsCount;
 
-  socket.emit(ChatEventActions.WELCOME, {
+  currentNameSpace.emit(ChatEventActions.WELCOME, {
     allUserCount: clientsCount,
     createdRoom: chatRoomList,
   } as ServerToClientInitData);
@@ -111,7 +102,7 @@ chattingNamespace.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('someone disconnected chattingChannel', socket.id);
     const clientsCount = io.engine.clientsCount;
-    currentNameSpace.emit(ChatEventActions.LEAVE_PAGE, clientsCount);
+    socket.broadcast.emit(ChatEventActions.LEAVE_PAGE, clientsCount);
   });
 });
 
@@ -130,6 +121,13 @@ let broadcasters: any = {};
 
 streamingNamespace.on('connection', (socket) => {
   console.log('someone connected streamingChannel', socket.id);
+
+  const clientsCount = io.engine.clientsCount;
+
+  socket.emit(VideoEventActions.WELCOME, {
+    allUserCount: clientsCount,
+    createdRoom: streamingRoomList,
+  } as ServerToClientInitData);
 
   socket.on(VideoEventActions.BROADCASTER, (room: string) => {
     // room: random unique string
