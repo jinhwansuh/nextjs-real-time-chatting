@@ -1,84 +1,57 @@
+import axios from 'axios';
 import { NextPage } from 'next';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Video } from '../../components/domain';
-import { VideoEventActions } from '../../types/constants';
+import { ServerToClientStreamingInitData } from '../../types/streaming';
 
 const Live: NextPage = () => {
-  const [currentSocket, setCurrentSocket] = useState<Socket>();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const router = useRouter();
+  const [streamingData, setStreamingData] =
+    useState<ServerToClientStreamingInitData>();
 
-  const room = '123';
-
+  const fetchStreamingData = async () => {
+    const data = await axios.get('http://localhost:8000/streamings');
+    setStreamingData({ ...data.data });
+    console.log(data);
+  };
   useEffect(() => {
-    let peerConnection: RTCPeerConnection;
-
-    const config = {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    };
-
-    const socket = io(`http://localhost:8000/streaming`);
-
-    socket.on('connect', () => {
-      socket.emit(VideoEventActions.WATCHER, { room });
-    });
-
-    setCurrentSocket(socket);
-
-    socket.on(VideoEventActions.OFFER, (id, description) => {
-      peerConnection = new RTCPeerConnection(config);
-      peerConnection
-        .setRemoteDescription(description)
-        .then(() => peerConnection.createAnswer())
-        .then((sdp) => peerConnection.setLocalDescription(sdp))
-        .then(() => {
-          socket.emit(
-            VideoEventActions.ANSWER,
-            id,
-            peerConnection.localDescription
-          );
-        });
-
-      peerConnection.ontrack = (event: any) => {
-        videoRef.current!.srcObject = event.streams[0]
-          ? event.streams[0]
-          : null;
-      };
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit(VideoEventActions.CANDIDATE, id, event.candidate);
-        }
-      };
-    });
-
-    socket.on(VideoEventActions.CANDIDATE, (id, candidate) => {
-      peerConnection
-        .addIceCandidate(new RTCIceCandidate(candidate))
-        .catch((e) => console.error(e));
-    });
-
-    socket.on(VideoEventActions.BROADCASTER, () => {
-      socket.emit(VideoEventActions.WATCHER, { room });
-    });
-
-    return () => {
-      socket.close();
-    };
+    fetchStreamingData();
   }, []);
+
+  // if (!streamingData) {
+  //   return <div>방송중인 사람이 없습니다</div>;
+  // }
 
   return (
     <>
       <div>현재 방송들 : 222개</div>
       <div>
-        <Video videoRef={videoRef} autoPlay playsInline muted />
+        {streamingData?.createdRoom.map((room) => (
+          <StyledRoomWrapper
+            key={room._id}
+            onClick={() => router.push(`/live/${room._id}`)}
+          >
+            방송 제목: {room.roomName} 스트리머: {room.streamer}
+          </StyledRoomWrapper>
+        ))}
       </div>
+
       <Link href="live/create">
-        <div>방송 생성하기</div>
+        <a>방송 생성하기</a>
       </Link>
     </>
   );
 };
+
+const StyledRoomContainer = styled.div``;
+
+const StyledRoomWrapper = styled.div`
+  width: 200px;
+  height: 200px;
+  background-color: #ddd;
+  cursor: pointer;
+`;
 
 export default Live;
