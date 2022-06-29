@@ -15,6 +15,7 @@ import { chatRoomList, streamingRoomList } from './src/utils/room';
 
 const app = express();
 const server = http.createServer(app);
+const cors = require('cors');
 
 const io = new Server(server, {
   cors: {
@@ -23,8 +24,13 @@ const io = new Server(server, {
   },
 });
 
+app.use(cors());
+
 app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
+});
+app.get('/streaming', (req: express.Request, res: express.Response) => {
+  res.send(JSON.stringify(streamingRoomList));
 });
 
 const chattingNamespace = io.of('/chatting');
@@ -154,6 +160,7 @@ streamingNamespace.on('connection', (socket) => {
     socket.to(broadcasters[user.room]).emit(VideoEventActions.WATCHER, user);
   });
   socket.on(VideoEventActions.OFFER, (id, event) => {
+    console.log('아이이디이다', id);
     socket.to(id).emit(VideoEventActions.OFFER, socket.id, event);
   });
   socket.on(VideoEventActions.ANSWER, (id, event) => {
