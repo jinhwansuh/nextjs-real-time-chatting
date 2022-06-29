@@ -7,10 +7,11 @@ import {
 } from '../client/src/types/constants';
 import {
   Message,
-  ServerRoomList,
+  ServerChatRoom,
   ServerToClientData,
   ServerToClientInitData,
 } from '../client/src/types/chat';
+import { chatRoomList } from './src/utils/room';
 
 const app = express();
 const server = http.createServer(app);
@@ -26,10 +27,12 @@ app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
 });
 
-let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
+const chattingNamespace = io.of('/chatting');
+const streamingNamespace = io.of('/streaming');
 
-/* 이런식으로 방의 형식 변경하기 
-  const ChatRoomList = [
+// chatting
+/* 
+  const chatRoomList = [
     {
       _id: uuid
       roomName: 'room1',
@@ -38,22 +41,10 @@ let room: ServerRoomList = ['DefaultRoom0', 'DefaultRoom1', 'DefaultRoom2'];
   ]; 
 */
 
-/* 
-  const VideoRoomList = [
-    {
-      _id: uuid
-      streamer: 'john Doe - id',
-      roomName: 'john Room',
-      roomUser: []
-    }
-  ]
-*/
-const videoMap = {};
+const findTargetRoom = (roomList: ServerChatRoom[], id: string) => {
+  return roomList.find((room) => room._id === id);
+};
 
-const chattingNamespace = io.of('/chatting');
-const streamingNamespace = io.of('/streaming');
-
-// chatting
 chattingNamespace.on('connection', (socket) => {
   const currentNameSpace = socket.nsp;
 
@@ -63,52 +54,58 @@ chattingNamespace.on('connection', (socket) => {
 
   socket.emit(ChatEventActions.WELCOME, {
     allUserCount: clientsCount,
-    createdRoom: room,
+    createdRoom: chatRoomList,
   } as ServerToClientInitData);
 
-  socket.on(ChatEventActions.JOIN_ROOM, async (data: Message) => {
-    const num = data.roomNumber;
-    socket.join(room[num]);
+  socket.on(ChatEventActions.JOIN_ROOM, (data: Message) => {
+    const targetRoom = findTargetRoom(chatRoomList, data.roomId);
+    if (targetRoom?._id) {
+      socket.join(targetRoom._id);
 
-    const clientsInRoom =
-      chattingNamespace.adapter.rooms.get(room[num])?.size || 0; // 방 유저
+      const clientsInRoom =
+        chattingNamespace.adapter.rooms.get(targetRoom._id)?.size || 0; // 방 유저
 
-    const serverToClientData: ServerToClientData = {
-      ...data,
-      message: `${data.roomNumber}번 방에 입장하셨습니다.`,
-      clientsInRoom,
-    };
+      const serverToClientData: ServerToClientData = {
+        ...data,
+        message: `${data.name}님이 입장하셨습니다.`,
+        clientsInRoom,
+      };
 
-    /* 
-      socket.to(room[num]).emit(ChatEventActions.JOIN_ROOM, serverToClientData); 
+      /* 
+      socket.to(chatRoomList[num]).emit(ChatEventActions.JOIN_ROOM, serverToClientData); 
       위 동작으로 하면 안되는 이유가 무엇인지 
       problem: 자기 자신이 join 했을때 이벤트가 발생하지 않는다.
       즉, 본인이 emit한 이벤트는 다시 on을 하지 않음 probably(broadcast 처럼?)
     */
-    currentNameSpace
-      .to(room[num])
-      .emit(ChatEventActions.JOIN_ROOM, serverToClientData);
+      currentNameSpace
+        .to(targetRoom._id)
+        .emit(ChatEventActions.JOIN_ROOM, serverToClientData);
+    }
   });
 
   socket.on(ChatEventActions.LEAVE_ROOM, (data: Message) => {
-    const num = data.roomNumber;
-    socket.leave(room[num]);
+    const targetRoom = findTargetRoom(chatRoomList, data.roomId);
+    if (targetRoom?._id) {
+      socket.leave(targetRoom._id);
 
-    const clientsInRoom =
-      chattingNamespace.adapter.rooms.get(room[num])?.size || 0;
-    const serverToClientData: ServerToClientData = {
-      ...data,
-      message: `${data.roomNumber}번 방을 퇴장하셨습니다.`,
-      clientsInRoom,
-    };
-    currentNameSpace
-      .to(room[num])
-      .emit(ChatEventActions.LEAVE_ROOM, serverToClientData);
+      const clientsInRoom =
+        chattingNamespace.adapter.rooms.get(targetRoom._id)?.size || 0;
+      const serverToClientData: ServerToClientData = {
+        ...data,
+        message: `${data.name} 님이 퇴장하셨습니다.`,
+        clientsInRoom,
+      };
+      currentNameSpace
+        .to(targetRoom._id)
+        .emit(ChatEventActions.LEAVE_ROOM, serverToClientData);
+    }
   });
 
   socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
-    const num = data.roomNumber;
-    currentNameSpace.to(room[num]).emit(ChatEventActions.CHAT_MESSAGE, data);
+    const targetRoom = findTargetRoom(chatRoomList, data.roomId);
+    currentNameSpace
+      .to(targetRoom!._id)
+      .emit(ChatEventActions.CHAT_MESSAGE, data);
   });
 
   socket.on('disconnect', () => {
@@ -119,31 +116,52 @@ chattingNamespace.on('connection', (socket) => {
 });
 
 // live streaming
-
+/* 
+  const streamingList = [
+    {
+      _id: uuid
+      streamer: socket.id,
+      roomName: 'john Room',
+      roomUser: []
+    }
+  ]
+*/
 let broadcasters: any = {};
-let broadcaster: string = '';
 
 streamingNamespace.on('connection', (socket) => {
   console.log('someone connected streamingChannel', socket.id);
 
-  socket.on(VideoEventActions.BROADCASTER, (room) => {
+  socket.on(VideoEventActions.BROADCASTER, (room: string) => {
+    // room: random unique string
     broadcasters[room] = socket.id;
     socket.join(room);
     socket.broadcast.emit(VideoEventActions.BROADCASTER);
   });
   socket.on(VideoEventActions.WATCHER, (user) => {
+    /* 
+      user = {
+        room: inputRoomNumber.value,
+        name: inputName.value,
+      };
+    */
     socket.join(user.room);
     user.id = socket.id;
-    socket.to(broadcasters[user.room]).emit('new viewer', user);
+    /* 
+      user = {
+        room: inputRoomNumber.value,
+        name: inputName.value,
+        id: socket.id
+      };
+    */
+    socket.to(broadcasters[user.room]).emit(VideoEventActions.WATCHER, user);
   });
   socket.on(VideoEventActions.OFFER, (id, event) => {
-    event.broadcaster.id = socket.id;
-    socket.to(id).emit(VideoEventActions.OFFER, event.broadcaster, event.sdp);
+    socket.to(id).emit(VideoEventActions.OFFER, socket.id, event);
   });
-  socket.on(VideoEventActions.ANSWER, (event) => {
+  socket.on(VideoEventActions.ANSWER, (id, event) => {
     socket
-      .to(broadcasters[event.room])
-      .emit(VideoEventActions.ANSWER, socket.id, event.sdp);
+      .to(id) // broadcaster id
+      .emit(VideoEventActions.ANSWER, socket.id, event);
   });
   socket.on(VideoEventActions.CANDIDATE, (id, message) => {
     socket.to(id).emit(VideoEventActions.CANDIDATE, socket.id, message);

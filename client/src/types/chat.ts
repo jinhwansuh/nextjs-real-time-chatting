@@ -1,7 +1,11 @@
 import { FormEvent, RefObject } from 'react';
 import { CSSProperties } from 'styled-components';
 
-export type ServerRoomList = string[];
+export type ServerChatRoom = {
+  _id: string;
+  roomName: string;
+  roomUser: string[];
+};
 
 export interface UserAtom {
   name: string;
@@ -10,13 +14,13 @@ export interface UserAtom {
 
 export interface ServerToClientInitData {
   allUserCount: number;
-  createdRoom: ServerRoomList;
+  createdRoom: ServerChatRoom[];
 }
 
 export interface Message {
   name: string;
   message: string;
-  roomNumber: number;
+  roomId: string;
   userSocketId: UserAtom['userSocketId'];
 }
 
@@ -28,11 +32,16 @@ export interface Props {
   style?: CSSProperties;
 }
 
+export interface RoomState {
+  id: string;
+  name: string;
+}
+
 export interface RoomListProps extends Props {
   serverData: ServerToClientInitData | undefined;
   clientInRoom: number;
-  roomState: number | undefined;
-  handleRoomChange: (e: string) => void;
+  roomState: RoomState;
+  handleRoomChange: (e: RoomState) => void;
 }
 
 export interface ChattingAreaProps extends Props {
