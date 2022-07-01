@@ -12,10 +12,13 @@ import {
   ServerToClientInitData,
 } from '../client/src/types/chat';
 import { chatRoomList, streamingRoomList } from './src/utils/room';
+import { ServerStreamingRoom } from '../client/src/types/streaming';
 
 const app = express();
 const server = http.createServer(app);
 const cors = require('cors');
+
+const PORT = 8000;
 
 const io = new Server(server, {
   cors: {
@@ -38,7 +41,13 @@ const streamingNamespace = io.of('/streaming');
 
 // chatting
 
-const findTargetRoom = (roomList: ServerChatRoom[], id: string) => {
+const findChatTargetRoom = (roomList: ServerChatRoom[], id: string) => {
+  return roomList.find((room) => room._id === id);
+};
+const findStreamingTargetRoom = (
+  roomList: ServerStreamingRoom[],
+  id: string
+) => {
   return roomList.find((room) => room._id === id);
 };
 
@@ -55,7 +64,7 @@ chattingNamespace.on('connection', (socket) => {
   } as ServerToClientInitData);
 
   socket.on(ChatEventActions.JOIN_ROOM, (data: Message) => {
-    const targetRoom = findTargetRoom(chatRoomList, data.roomId);
+    const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
     if (targetRoom?._id) {
       socket.join(targetRoom._id);
 
@@ -67,13 +76,6 @@ chattingNamespace.on('connection', (socket) => {
         message: `${data.name}님이 입장하셨습니다.`,
         clientsInRoom,
       };
-
-      /* 
-      socket.to(chatRoomList[num]).emit(ChatEventActions.JOIN_ROOM, serverToClientData); 
-      위 동작으로 하면 안되는 이유가 무엇인지 
-      problem: 자기 자신이 join 했을때 이벤트가 발생하지 않는다.
-      즉, 본인이 emit한 이벤트는 다시 on을 하지 않음 probably(broadcast 처럼?)
-    */
       currentNameSpace
         .to(targetRoom._id)
         .emit(ChatEventActions.JOIN_ROOM, serverToClientData);
@@ -81,7 +83,7 @@ chattingNamespace.on('connection', (socket) => {
   });
 
   socket.on(ChatEventActions.LEAVE_ROOM, (data: Message) => {
-    const targetRoom = findTargetRoom(chatRoomList, data.roomId);
+    const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
     if (targetRoom?._id) {
       socket.leave(targetRoom._id);
 
@@ -99,7 +101,7 @@ chattingNamespace.on('connection', (socket) => {
   });
 
   socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
-    const targetRoom = findTargetRoom(chatRoomList, data.roomId);
+    const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
     currentNameSpace
       .to(targetRoom!._id)
       .emit(ChatEventActions.CHAT_MESSAGE, data);
@@ -126,41 +128,65 @@ chattingNamespace.on('connection', (socket) => {
 let broadcasters: any = {};
 
 streamingNamespace.on('connection', (socket) => {
+  const currentNameSpace = socket.nsp;
+
   console.log('someone connected streamingChannel', socket.id);
 
-  const clientsCount = io.engine.clientsCount;
+  socket.on('disconnect', () => {
+    console.log('someone disconnected streamingChannel', socket.id);
+    // socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
+  });
 
-  socket.emit(VideoEventActions.WELCOME, {
-    allUserCount: clientsCount,
-    createdRoom: streamingRoomList,
-  } as ServerToClientInitData);
+  // Streaming Channel communication 수정 필요
 
-  socket.on(VideoEventActions.BROADCASTER, (room: string) => {
+  socket.on(VideoEventActions.ENTER_ROOM, (data: Message) => {
+    socket.join(data.roomId);
+
+    const clientsInRoom =
+      chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0; // 방 유저
+
+    const serverToClientData: ServerToClientData = {
+      ...data,
+      message: `${data.name}님이 입장하셨습니다.`,
+      clientsInRoom,
+    };
+    currentNameSpace
+      .to(data.roomId)
+      .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
+  });
+
+  // socket.on(VideoEventActions.LEAVE_ROOM, (data: Message) => {
+  //   socket.leave(data.roomId);
+
+  //   const clientsInRoom =
+  //     chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
+  //   const serverToClientData: ServerToClientData = {
+  //     ...data,
+  //     message: `${data.name} 님이 퇴장하셨습니다.`,
+  //     clientsInRoom,
+  //   };
+  //   socket
+  //     .to(data.roomId)
+  //     .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
+  // });
+
+  socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
+    currentNameSpace.to(data.roomId).emit(ChatEventActions.CHAT_MESSAGE, data);
+  });
+
+  // Streaming Video communication
+  socket.on(VideoEventActions.BROADCASTER, (broadcasterRoomId: string) => {
     // room: random unique string
-    broadcasters[room] = socket.id;
-    socket.join(room);
+    broadcasters[broadcasterRoomId] = socket.id;
+    socket.join(broadcasterRoomId);
     socket.broadcast.emit(VideoEventActions.BROADCASTER);
   });
   socket.on(VideoEventActions.WATCHER, (user) => {
-    /* 
-      user = {
-        room: inputRoomNumber.value,
-        name: inputName.value,
-      };
-    */
-    socket.join(user.room);
+    socket.join(user.roomId);
     user.id = socket.id;
-    /* 
-      user = {
-        room: inputRoomNumber.value,
-        name: inputName.value,
-        id: socket.id
-      };
-    */
-    socket.to(broadcasters[user.room]).emit(VideoEventActions.WATCHER, user);
+    socket.to(broadcasters[user.roomId]).emit(VideoEventActions.WATCHER, user);
   });
   socket.on(VideoEventActions.OFFER, (id, event) => {
-    console.log('아이이디이다', id);
     socket.to(id).emit(VideoEventActions.OFFER, socket.id, event);
   });
   socket.on(VideoEventActions.ANSWER, (id, event) => {
@@ -171,13 +197,8 @@ streamingNamespace.on('connection', (socket) => {
   socket.on(VideoEventActions.CANDIDATE, (id, message) => {
     socket.to(id).emit(VideoEventActions.CANDIDATE, socket.id, message);
   });
-
-  socket.on('disconnect', () => {
-    console.log('someone disconnected streamingChannel', socket.id);
-    // socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
-  });
 });
 
-server.listen(8000, () => {
-  console.log('listening chat project, port: 8000');
+server.listen(PORT, () => {
+  console.log(`listening chat project, port: ${PORT}`);
 });
