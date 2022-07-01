@@ -110,13 +110,15 @@ const Chat: NextPageWithLayout = () => {
 
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    currentSocket?.emit(ChatEventActions.CHAT_MESSAGE, {
-      name: userState.name,
-      roomId: roomState.id,
-      message: chatInputState,
-      userSocketId: userState.userSocketId,
-    } as Message);
-    setChatInputState('');
+    if (roomState.id !== '') {
+      currentSocket?.emit(ChatEventActions.CHAT_MESSAGE, {
+        name: userState.name,
+        roomId: roomState.id,
+        message: chatInputState,
+        userSocketId: userState.userSocketId,
+      } as Message);
+      setChatInputState('');
+    }
   };
 
   return (
