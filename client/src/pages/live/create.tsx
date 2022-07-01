@@ -1,7 +1,6 @@
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import styled from 'styled-components';
-import { v4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 import { Video } from '../../components/domain';
 import { VideoEventActions } from '../../types/constants';
 
@@ -25,6 +24,7 @@ const Create = () => {
     });
 
     socket.on(VideoEventActions.WATCHER, (viewer) => {
+      console.log(peerConnections);
       peerConnections[viewer.id] = new RTCPeerConnection(config);
 
       const stream = videoRef.current!.srcObject;
@@ -104,6 +104,7 @@ const Create = () => {
   };
 
   const handleStartStreaming = () => {
+    console.log('클릭');
     currentSocket?.emit(VideoEventActions.BROADCASTER, room);
   };
 
