@@ -1,13 +1,18 @@
 import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { v4 as uuidV4 } from 'uuid';
-import { Video } from '../../components/domain';
+import { user } from '../../atoms/user';
+import { StreamingChattingArea, Video } from '../../components/domain';
+import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 
 const Create = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [streamState, setStreamState] = useState<MediaStream>();
+  const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const userState = useRecoilValue(user);
   const room = '123';
 
   useEffect(() => {
@@ -18,7 +23,13 @@ const Create = () => {
     const socket = io(`http://localhost:8000/streaming`);
 
     setCurrentSocket(socket);
-
+    socket.on('connect', () => {
+      socket.emit(VideoEventActions.ENTER_ROOM, {
+        roomId: room,
+        name: userState.name,
+        userSocketId: userState.userSocketId,
+      });
+    });
     socket.on(VideoEventActions.ANSWER, (id, description) => {
       peerConnections[id].setRemoteDescription(description);
     });
@@ -65,6 +76,18 @@ const Create = () => {
     //   peerConnections[id].close();
     //   delete peerConnections[id];
     // });
+
+    socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
+      setChatListState((prev) => [
+        ...prev,
+        {
+          userSocketId: data.userSocketId,
+          name: data.name,
+          roomId: data.roomId,
+          message: data.message,
+        },
+      ]);
+    });
 
     return () => {
       socket.close();
@@ -121,6 +144,12 @@ const Create = () => {
         <button onClick={handleVideoClick}>비디오 연결하기</button>
         <button onClick={handleDisplayClick}>화면 공유하기</button>
       </div>
+      <StreamingChattingArea
+        chatListState={chatListState}
+        roomId={room as string}
+        currentSocket={currentSocket}
+      ></StreamingChattingArea>
+
       <div onClick={handleStartStreaming}>방송 만들기</div>
     </>
   );
