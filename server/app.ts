@@ -46,16 +46,6 @@ const streamingNamespace = io.of('/streaming');
 
 // chatting
 
-const findChatTargetRoom = (roomList: ServerChatRoom[], id: string) => {
-  return roomList.find((room) => room._id === id);
-};
-const findStreamingTargetRoom = (
-  roomList: ServerStreamingRoom[],
-  id: string
-) => {
-  return roomList.find((room) => room._id === id);
-};
-
 chattingNamespace.on('connection', (socket) => {
   const currentNameSpace = socket.nsp;
 
@@ -69,47 +59,38 @@ chattingNamespace.on('connection', (socket) => {
   } as ServerToClientInitData);
 
   socket.on(ChatEventActions.JOIN_ROOM, (data: ChatEnterLeaveActionData) => {
-    const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
-    if (targetRoom?._id) {
-      socket.join(targetRoom._id);
+    socket.join(data.roomId);
 
-      const clientsInRoom =
-        chattingNamespace.adapter.rooms.get(targetRoom._id)?.size || 0; // 방 유저
+    const clientsInRoom =
+      chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0; // 방 유저
 
-      const serverToClientData: ServerToClientData = {
-        ...data,
-        message: `${data.name}님이 입장하셨습니다.`,
-        clientsInRoom,
-      };
-      currentNameSpace
-        .to(targetRoom._id)
-        .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
-    }
+    const serverToClientData: ServerToClientData = {
+      ...data,
+      message: `${data.name}님이 입장하셨습니다.`,
+      clientsInRoom,
+    };
+    currentNameSpace
+      .to(data.roomId)
+      .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
   });
 
   socket.on(ChatEventActions.LEAVE_ROOM, (data: ChatEnterLeaveActionData) => {
-    const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
-    if (targetRoom?._id) {
-      socket.leave(targetRoom._id);
+    socket.leave(data.roomId);
 
-      const clientsInRoom =
-        chattingNamespace.adapter.rooms.get(targetRoom._id)?.size || 0;
-      const serverToClientData: ServerToClientData = {
-        ...data,
-        message: `${data.name} 님이 퇴장하셨습니다.`,
-        clientsInRoom,
-      };
-      socket
-        .to(targetRoom._id)
-        .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
-    }
+    const clientsInRoom =
+      chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
+    const serverToClientData: ServerToClientData = {
+      ...data,
+      message: `${data.name} 님이 퇴장하셨습니다.`,
+      clientsInRoom,
+    };
+    socket
+      .to(data.roomId)
+      .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
   });
 
   socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
-    const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
-    currentNameSpace
-      .to(targetRoom!._id)
-      .emit(ChatEventActions.CHAT_MESSAGE, data);
+    currentNameSpace.to(data.roomId).emit(ChatEventActions.CHAT_MESSAGE, data);
   });
 
   socket.on(ChatEventActions.CREATE_ROOM, (data: ChatCreateRoomActionData) => {
