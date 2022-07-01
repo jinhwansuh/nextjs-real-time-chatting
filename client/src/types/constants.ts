@@ -14,4 +14,9 @@ export const VideoEventActions = {
   ANSWER: 'answer',
   CANDIDATE: 'candidate',
   DISCONNECT_PEER: 'disconnectPeer',
+  ENTER_ROOM: 'enterRoom',
+  JOIN_ROOM: 'joinRoom',
+  LEAVE_ROOM: 'leaveRoom',
+  CHAT_MESSAGE: 'chatMessage',
+  LEAVE_PAGE: 'leavePage',
 } as const;
