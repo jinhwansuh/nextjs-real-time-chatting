@@ -6,6 +6,7 @@ const RoomList = ({
   roomState,
   clientInRoom,
   handleRoomChange,
+  handleCreateRoomClick,
   ...props
 }: RoomListProps) => {
   if (!serverData) {
@@ -48,7 +49,7 @@ const RoomList = ({
           </div>
         ))}
       </StyledRoomWrapper>
-      <div>새로운 방 생성하기</div>
+      <div onClick={handleCreateRoomClick}>Create a new Chat Room</div>
     </StyledContainer>
   );
 };
