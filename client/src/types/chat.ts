@@ -11,6 +11,7 @@ export interface UserAtom {
   name: string;
   userSocketId: string;
 }
+export type ChatEnterLeaveActionData = Omit<Message, 'message'>;
 
 export interface ChatCreateRoomActionData {
   roomName: string;

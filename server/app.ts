@@ -7,6 +7,7 @@ import {
 } from '../client/src/types/constants';
 import {
   ChatCreateRoomActionData,
+  ChatEnterLeaveActionData,
   Message,
   ServerChatRoom,
   ServerToClientData,
@@ -67,7 +68,7 @@ chattingNamespace.on('connection', (socket) => {
     createdRoom: chatRoomList,
   } as ServerToClientInitData);
 
-  socket.on(ChatEventActions.JOIN_ROOM, (data: Message) => {
+  socket.on(ChatEventActions.JOIN_ROOM, (data: ChatEnterLeaveActionData) => {
     const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
     if (targetRoom?._id) {
       socket.join(targetRoom._id);
@@ -82,11 +83,11 @@ chattingNamespace.on('connection', (socket) => {
       };
       currentNameSpace
         .to(targetRoom._id)
-        .emit(ChatEventActions.JOIN_ROOM, serverToClientData);
+        .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
     }
   });
 
-  socket.on(ChatEventActions.LEAVE_ROOM, (data: Message) => {
+  socket.on(ChatEventActions.LEAVE_ROOM, (data: ChatEnterLeaveActionData) => {
     const targetRoom = findChatTargetRoom(chatRoomList, data.roomId);
     if (targetRoom?._id) {
       socket.leave(targetRoom._id);
@@ -98,9 +99,9 @@ chattingNamespace.on('connection', (socket) => {
         message: `${data.name} 님이 퇴장하셨습니다.`,
         clientsInRoom,
       };
-      currentNameSpace
+      socket
         .to(targetRoom._id)
-        .emit(ChatEventActions.LEAVE_ROOM, serverToClientData);
+        .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
     }
   });
 

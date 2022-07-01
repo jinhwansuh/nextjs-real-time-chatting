@@ -43,25 +43,8 @@ const Chat: NextPageWithLayout = () => {
 
     setCurrentSocket(socket);
 
-    socket.on(ChatEventActions.CHAT_MESSAGE, (data: Message) => {
-      setChatListState((prev) => [...prev, data]);
-    });
-
-    socket.on(ChatEventActions.LEAVE_ROOM, (data: ServerToClientData) => {
-      setClientInCurrentRoom((prev) => prev - 1);
-      setChatListState((prev) => [
-        ...prev,
-        {
-          userSocketId: data.userSocketId,
-          name: data.name,
-          roomId: data.roomId,
-          message: data.message,
-        },
-      ]);
-    });
-
-    socket.on(ChatEventActions.JOIN_ROOM, (data: ServerToClientData) => {
-      setClientInCurrentRoom(data.clientsInRoom);
+    socket.on(ChatEventActions.CHAT_MESSAGE, (data: ServerToClientData) => {
+      if (data.clientsInRoom) setClientInCurrentRoom(data.clientsInRoom);
       setChatListState((prev) => [
         ...prev,
         {
