@@ -124,17 +124,24 @@ const Chat: NextPageWithLayout = () => {
     }
   };
 
-  const handleCreateRoomClick = () => {
-    const data: ChatCreateRoomActionData = {
-      _id: v4(),
-      roomName: 'asdf',
-    };
-    currentSocket?.emit(ChatEventActions.CREATE_ROOM, data);
-    handleRoomChange({ id: data._id, name: data.roomName });
+  const fetchRoomData = async () => {
+    const response = await axios.get('http://localhost:8000/chatting');
+    if (response.status === 200) {
+      setServerState((prev) => ({ ...prev, createdRoom: [...response.data] }));
+    }
+  };
 
-    axios
-      .get('http://localhost:8000/chatting')
-      .then((data) => console.log(data));
+  const handleCreateRoomClick = () => {
+    const roomName = prompt('new Room Name?');
+    if (roomName) {
+      const data: ChatCreateRoomActionData = {
+        _id: v4(),
+        roomName: roomName,
+      };
+      currentSocket?.emit(ChatEventActions.CREATE_ROOM, data);
+      fetchRoomData();
+      handleRoomChange({ id: data._id, name: data.roomName });
+    }
   };
 
   return (
