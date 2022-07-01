@@ -30,17 +30,12 @@ const StreamingRoom: NextPage = () => {
     const socket = io(`http://localhost:8000/streaming`);
 
     socket.on('connect', () => {
-      /* 
-        여기서 enter_room을 emit 한다.
-        서버에서 on(enter_room)을 받고 emit(Chat)을 한다.
-
-      */
       socket.emit(VideoEventActions.WATCHER, { roomId });
       socket.emit(VideoEventActions.ENTER_ROOM, {
         roomId,
         name: userState.name,
         userSocketId: userState.userSocketId,
-      }); // 보내주기만 하면 되지 않을까?
+      });
     });
 
     setCurrentSocket(socket);
@@ -94,7 +89,7 @@ const StreamingRoom: NextPage = () => {
     });
 
     return () => {
-      socket?.emit(VideoEventActions.LEAVE_ROOM, {
+      socket.emit(VideoEventActions.LEAVE_ROOM, {
         roomId,
         name: userState.name,
         userSocketId: userState.userSocketId,
