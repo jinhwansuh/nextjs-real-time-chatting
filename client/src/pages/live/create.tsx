@@ -1,13 +1,15 @@
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent, ReactElement, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { v4 as uuidV4 } from 'uuid';
 import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
+import Layout from '../../components/layout';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
+import { NextPageWithLayout } from '../_app';
 
-const Create = () => {
+const Create: NextPageWithLayout = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [streamState, setStreamState] = useState<MediaStream>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
@@ -153,6 +155,10 @@ const Create = () => {
       <div onClick={handleStartStreaming}>방송 만들기</div>
     </>
   );
+};
+
+Create.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
 };
 
 export default Create;

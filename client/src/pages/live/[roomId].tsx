@@ -1,15 +1,17 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
 import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
+import Layout from '../../components/layout';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
+import { NextPageWithLayout } from '../_app';
 
-const StreamingRoom: NextPage = () => {
+const StreamingRoom: NextPageWithLayout = () => {
   const router = useRouter();
   const userState = useRecoilValue(user);
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -110,6 +112,10 @@ const StreamingRoom: NextPage = () => {
       ></StreamingChattingArea>
     </>
   );
+};
+
+StreamingRoom.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
 };
 
 export default StreamingRoom;
