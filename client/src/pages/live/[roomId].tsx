@@ -36,7 +36,11 @@ const StreamingRoom: NextPage = () => {
 
       */
       socket.emit(VideoEventActions.WATCHER, { roomId });
-      socket.emit(VideoEventActions.ENTER_ROOM, { roomId }); // 보내주기만 하면 되지 않을까?
+      socket.emit(VideoEventActions.ENTER_ROOM, {
+        roomId,
+        name: userState.name,
+        userSocketId: userState.userSocketId,
+      }); // 보내주기만 하면 되지 않을까?
     });
 
     setCurrentSocket(socket);
@@ -90,6 +94,11 @@ const StreamingRoom: NextPage = () => {
     });
 
     return () => {
+      socket?.emit(VideoEventActions.LEAVE_ROOM, {
+        roomId,
+        name: userState.name,
+        userSocketId: userState.userSocketId,
+      });
       socket.close();
     };
   }, [roomId]);
