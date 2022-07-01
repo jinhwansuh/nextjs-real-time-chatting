@@ -1,4 +1,5 @@
 import { NextPage } from 'next';
+import styled from 'styled-components';
 import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { io, Socket } from 'socket.io-client';
@@ -12,7 +13,7 @@ import {
 } from '../../types/chat';
 import { ChatEventActions } from '../../types/constants';
 import type { NextPageWithLayout } from '../_app';
-import { RoomList, ChattingArea, Main } from './index.styled';
+import { ChattingArea, RoomList } from '../../components/domain';
 
 const Chat: NextPageWithLayout = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -33,6 +34,7 @@ const Chat: NextPageWithLayout = () => {
     });
 
     socket.on(ChatEventActions.WELCOME, (data: ServerToClientInitData) => {
+      console.log(data);
       setServerState({ ...data });
     });
 
@@ -119,13 +121,13 @@ const Chat: NextPageWithLayout = () => {
 
   return (
     <Main>
-      <RoomList
+      <StyledRoomList
         roomState={roomState}
         serverData={serverState}
         clientInRoom={clientInCurrentRoom}
         handleRoomChange={handleRoomChange}
       />
-      <ChattingArea
+      <StyledChattingArea
         mySocketId={userState.userSocketId}
         chatList={chatListState}
         containerRef={containerRef}
@@ -136,6 +138,20 @@ const Chat: NextPageWithLayout = () => {
     </Main>
   );
 };
+const Main = styled.main`
+  width: 850px;
+  height: 650px;
+  border: 1px solid #ddd;
+`;
+
+const StyledRoomList = styled(RoomList)`
+  width: 200px;
+  background: #fcfcfc;
+`;
+
+const StyledChattingArea = styled(ChattingArea)`
+  flex: 1;
+`;
 
 Chat.getLayout = function getLayout(page: ReactElement) {
   return <Layout>{page}</Layout>;
