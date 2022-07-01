@@ -155,20 +155,20 @@ streamingNamespace.on('connection', (socket) => {
       .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
   });
 
-  // socket.on(VideoEventActions.LEAVE_ROOM, (data: Message) => {
-  //   socket.leave(data.roomId);
+  socket.on(VideoEventActions.LEAVE_ROOM, (data: Message) => {
+    socket.leave(data.roomId);
 
-  //   const clientsInRoom =
-  //     chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
-  //   const serverToClientData: ServerToClientData = {
-  //     ...data,
-  //     message: `${data.name} 님이 퇴장하셨습니다.`,
-  //     clientsInRoom,
-  //   };
-  //   socket
-  //     .to(data.roomId)
-  //     .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
-  // });
+    const clientsInRoom =
+      chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
+    const serverToClientData: ServerToClientData = {
+      ...data,
+      message: `${data.name} 님이 퇴장하셨습니다.`,
+      clientsInRoom,
+    };
+    socket
+      .to(data.roomId)
+      .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
+  });
 
   socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
     currentNameSpace.to(data.roomId).emit(ChatEventActions.CHAT_MESSAGE, data);
