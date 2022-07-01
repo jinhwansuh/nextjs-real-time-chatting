@@ -47,6 +47,7 @@ export interface RoomListProps extends Props {
   serverData: ServerToClientInitData | undefined;
   clientInRoom: number;
   roomState: RoomState;
+  handleFetchRoomData: () => void;
   handleRoomChange: (e: RoomState) => void;
   handleCreateRoomClick: () => void;
 }

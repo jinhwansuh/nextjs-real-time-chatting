@@ -9,6 +9,7 @@ import {
   ChatCreateRoomActionData,
   Message,
   RoomState,
+  ServerChatRoom,
   ServerToClientData,
   ServerToClientInitData,
 } from '../../types/chat';
@@ -110,12 +111,15 @@ const Chat: NextPageWithLayout = () => {
   const fetchRoomData = async () => {
     const response = await axios.get('http://localhost:8000/chatting');
     if (response.status === 200) {
-      setServerState((prev) => ({ ...prev, createdRoom: [...response.data] }));
+      setServerState((prev: any) => ({
+        ...prev,
+        createdRoom: [...(response.data as ServerChatRoom[])],
+      }));
     }
   };
 
   const handleCreateRoomClick = () => {
-    const roomName = prompt('new Room Name?');
+    const roomName = prompt('Room Name?');
     if (roomName) {
       const data: ChatCreateRoomActionData = {
         _id: v4(),
@@ -133,6 +137,7 @@ const Chat: NextPageWithLayout = () => {
         roomState={roomState}
         serverData={serverState}
         clientInRoom={clientInCurrentRoom}
+        handleFetchRoomData={fetchRoomData}
         handleRoomChange={handleRoomChange}
         handleCreateRoomClick={handleCreateRoomClick}
       />
