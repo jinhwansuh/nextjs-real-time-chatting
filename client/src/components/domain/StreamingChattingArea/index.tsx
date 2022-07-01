@@ -14,7 +14,7 @@ interface Props {
   style?: CSSProperties;
 }
 
-const StreamingChatForm = ({
+const StreamingChattingArea = ({
   chatListState,
   roomId,
   currentSocket,
@@ -89,4 +89,4 @@ const StyledChatItem = styled.div`
   background-color: #ababef;
 `;
 
-export default StreamingChatForm;
+export default StreamingChattingArea;
