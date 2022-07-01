@@ -1,11 +1,12 @@
 import { NextPage } from 'next';
 import styled from 'styled-components';
 import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { user } from '../../atoms/user';
 import Layout from '../../components/layout';
 import {
+  ChatCreateRoomActionData,
   Message,
   RoomState,
   ServerToClientData,
@@ -14,6 +15,8 @@ import {
 import { ChatEventActions } from '../../types/constants';
 import type { NextPageWithLayout } from '../_app';
 import { ChattingArea, RoomList } from '../../components/domain';
+import { v4 } from 'uuid';
+import axios from 'axios';
 
 const Chat: NextPageWithLayout = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -26,7 +29,7 @@ const Chat: NextPageWithLayout = () => {
     name: '',
   });
   const [chatInputState, setChatInputState] = useState('');
-  const [userState, setUserState] = useRecoilState(user);
+  const userState = useRecoilValue(user);
 
   useEffect(() => {
     const socket = io(`http://localhost:8000/chatting`, {
@@ -121,6 +124,19 @@ const Chat: NextPageWithLayout = () => {
     }
   };
 
+  const handleCreateRoomClick = () => {
+    const data: ChatCreateRoomActionData = {
+      _id: v4(),
+      roomName: 'asdf',
+    };
+    currentSocket?.emit(ChatEventActions.CREATE_ROOM, data);
+    handleRoomChange({ id: data._id, name: data.roomName });
+
+    axios
+      .get('http://localhost:8000/chatting')
+      .then((data) => console.log(data));
+  };
+
   return (
     <Main>
       <StyledRoomList
@@ -128,6 +144,7 @@ const Chat: NextPageWithLayout = () => {
         serverData={serverState}
         clientInRoom={clientInCurrentRoom}
         handleRoomChange={handleRoomChange}
+        handleCreateRoomClick={handleCreateRoomClick}
       />
       <StyledChattingArea
         mySocketId={userState.userSocketId}

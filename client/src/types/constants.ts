@@ -4,6 +4,7 @@ export const ChatEventActions = {
   LEAVE_ROOM: 'leaveRoom',
   CHAT_MESSAGE: 'chatMessage',
   LEAVE_PAGE: 'leavePage',
+  CREATE_ROOM: 'createRoom',
 } as const;
 
 export const VideoEventActions = {

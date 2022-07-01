@@ -12,6 +12,11 @@ export interface UserAtom {
   userSocketId: string;
 }
 
+export interface ChatCreateRoomActionData {
+  roomName: string;
+  _id: string;
+}
+
 export interface ServerToClientInitData {
   allUserCount: number;
   createdRoom: ServerChatRoom[];
@@ -42,6 +47,7 @@ export interface RoomListProps extends Props {
   clientInRoom: number;
   roomState: RoomState;
   handleRoomChange: (e: RoomState) => void;
+  handleCreateRoomClick: () => void;
 }
 
 export interface ChattingAreaProps extends Props {
