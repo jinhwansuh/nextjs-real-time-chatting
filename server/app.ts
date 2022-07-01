@@ -6,6 +6,7 @@ import {
   VideoEventActions,
 } from '../client/src/types/constants';
 import {
+  ChatCreateRoomActionData,
   Message,
   ServerChatRoom,
   ServerToClientData,
@@ -31,6 +32,9 @@ app.use(cors());
 
 app.get('/', (req: express.Request, res: express.Response) => {
   res.send('<h1>test</h1>');
+});
+app.get('/chatting', (req: express.Request, res: express.Response) => {
+  res.send(JSON.stringify(chatRoomList));
 });
 app.get('/streaming', (req: express.Request, res: express.Response) => {
   res.send(JSON.stringify(streamingRoomList));
@@ -105,6 +109,14 @@ chattingNamespace.on('connection', (socket) => {
     currentNameSpace
       .to(targetRoom!._id)
       .emit(ChatEventActions.CHAT_MESSAGE, data);
+  });
+
+  socket.on(ChatEventActions.CREATE_ROOM, (data: ChatCreateRoomActionData) => {
+    chatRoomList.push({
+      _id: data._id,
+      roomName: data.roomName,
+      roomUser: [],
+    });
   });
 
   socket.on('disconnect', () => {
