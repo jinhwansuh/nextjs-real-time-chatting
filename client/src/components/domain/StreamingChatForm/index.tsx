@@ -1,4 +1,4 @@
-import { FormEvent, RefObject, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { Socket } from 'socket.io-client';
 import styled, { CSSProperties } from 'styled-components';
@@ -8,21 +8,20 @@ import { Message } from '../../../types/chat';
 import { VideoEventActions } from '../../../types/constants';
 
 interface Props {
-  chattingRef: RefObject<HTMLDivElement>;
   chatListState: Message[];
   roomId: string;
-  currentSocket: Socket;
+  currentSocket: Socket | undefined;
   style?: CSSProperties;
 }
 
 const StreamingChatForm = ({
-  chattingRef,
   chatListState,
   roomId,
   currentSocket,
   ...props
 }: Props) => {
   const [chatInputState, setChatInputState] = useState('');
+  const chattingRef = useRef<HTMLDivElement>(null);
   const userState = useRecoilValue(user);
 
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -39,7 +38,7 @@ const StreamingChatForm = ({
 
   useEffect(() => {
     chattingRef.current?.scrollTo(0, chattingRef.current.scrollHeight);
-  }, [chattingRef, chatListState]);
+  }, [chatListState]);
 
   return (
     <>
