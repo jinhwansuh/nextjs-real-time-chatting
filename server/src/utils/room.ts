@@ -21,7 +21,7 @@ export const chatRoomList: ServerChatRoom[] = [
 
 export const streamingRoomList: ServerStreamingRoom[] = [
   {
-    _id: 'desire',
+    _id: '123',
     streamer: 'jin',
     roomName: 'ma first Stream',
     roomUser: [],
