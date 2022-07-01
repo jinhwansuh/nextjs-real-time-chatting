@@ -17,6 +17,7 @@ const StreamingRoom: NextPage = () => {
   const [chatInputState, setChatInputState] = useState('');
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const chattingRef = useRef<HTMLDivElement>(null);
   const { roomId } = router.query;
 
   useEffect(() => {
@@ -98,6 +99,10 @@ const StreamingRoom: NextPage = () => {
     };
   }, [roomId]);
 
+  useEffect(() => {
+    chattingRef.current?.scrollTo(0, chattingRef.current.scrollHeight);
+  }, [chatListState]);
+
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data: Message = {
@@ -116,17 +121,15 @@ const StreamingRoom: NextPage = () => {
       <div>
         <Video videoRef={videoRef} autoPlay playsInline muted />
       </div>
-      <StyledChattingContainer>
-        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatem
-        soluta vitae tenetur tempore accusantium impedit magnam voluptatum rem.
-        Officiis vero qui ut quas, illo officia eius reiciendis repellat aut
-        nesciunt.
-        {chatListState.map((chat) => (
-          <StyledChatItem key={v4()}>
-            {chat.name} : {chat.message}
-          </StyledChatItem>
-        ))}
-        <form onSubmit={handleChatSubmit}>
+      <StyledChattingContainer ref={chattingRef}>
+        <StyledChattingWrapper>
+          {chatListState.map((chat) => (
+            <StyledChatItem key={v4()}>
+              {chat.name} : {chat.message}
+            </StyledChatItem>
+          ))}
+        </StyledChattingWrapper>
+        <StyledForm onSubmit={handleChatSubmit}>
           <input
             value={chatInputState}
             onChange={(e) => setChatInputState(e.target.value)}
@@ -134,7 +137,7 @@ const StreamingRoom: NextPage = () => {
           <button type="submit" disabled={!chatInputState.trim().length}>
             전송
           </button>
-        </form>
+        </StyledForm>
       </StyledChattingContainer>
     </>
   );
@@ -142,9 +145,23 @@ const StreamingRoom: NextPage = () => {
 
 const StyledChattingContainer = styled.div`
   overflow-y: auto;
+  position: relative;
   background-color: #eee;
   width: 80%;
-  height: 250px;
+  height: 200px;
+`;
+const StyledChattingWrapper = styled.div`
+  min-height: calc(100% - 25px);
+`;
+const StyledForm = styled.form`
+  position: sticky;
+  bottom: 0px;
+  width: 100%;
+  display: flex;
+  height: 25px;
+  background-color: #ffffff;
+  /* padding: 6px; */
+  box-sizing: border-box;
 `;
 
 const StyledChatItem = styled.div`
