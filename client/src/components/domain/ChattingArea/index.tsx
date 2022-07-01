@@ -44,6 +44,7 @@ function ChattingArea({
 const StyledContainer = styled.div`
   position: relative;
   overflow-y: auto;
+  background-color: #eee;
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -95,7 +96,7 @@ const StyledUserContainer = styled.div`
 `;
 
 const StyledFromUserWrapper = styled.div`
-  background-color: #eee;
+  background-color: #ffffff;
   max-width: 300px;
   padding: 8px 12px;
   border-radius: 8px;
@@ -119,7 +120,7 @@ const StyledName = styled.span`
 `;
 
 const StyledMyMsgWrapper = styled.div`
-  background-color: #eee;
+  background-color: #ffffff;
   max-width: 300px;
   padding: 8px 12px;
   border-radius: 8px;
