@@ -4,31 +4,34 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { ServerToClientStreamingInitData } from '../../types/streaming';
+import { ServerStreamingRoom } from '../../types/streaming';
 
 const Live: NextPage = () => {
   const router = useRouter();
-  const [streamingData, setStreamingData] =
-    useState<ServerToClientStreamingInitData>();
+  const [streamingData, setStreamingData] = useState<ServerStreamingRoom[]>();
 
   const fetchStreamingData = async () => {
-    const data = await axios.get('http://localhost:8000/streamings');
-    setStreamingData({ ...data.data });
-    console.log(data);
+    try {
+      const response = await axios.get('http://localhost:8000/streaming');
+      setStreamingData([...response.data]);
+    } catch (e) {
+      console.error(e);
+    }
   };
+
   useEffect(() => {
     fetchStreamingData();
   }, []);
 
-  // if (!streamingData) {
-  //   return <div>방송중인 사람이 없습니다</div>;
-  // }
+  if (!streamingData) {
+    return <div>방송중인 사람이 없습니다</div>;
+  }
 
   return (
     <>
       <div>현재 방송들 : 222개</div>
       <div>
-        {streamingData?.createdRoom.map((room) => (
+        {streamingData?.map((room) => (
           <StyledRoomWrapper
             key={room._id}
             onClick={() => router.push(`/live/${room._id}`)}
@@ -38,7 +41,7 @@ const Live: NextPage = () => {
         ))}
       </div>
 
-      <Link href="live/create">
+      <Link href="/live/create">
         <a>방송 생성하기</a>
       </Link>
     </>
