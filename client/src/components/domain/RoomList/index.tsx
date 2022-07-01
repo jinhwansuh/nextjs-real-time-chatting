@@ -5,6 +5,7 @@ const RoomList = ({
   serverData,
   roomState,
   clientInRoom,
+  handleFetchRoomData,
   handleRoomChange,
   handleCreateRoomClick,
   ...props
@@ -31,7 +32,7 @@ const RoomList = ({
             <strong>{clientInRoom}</strong>
           </div>
         )}
-        <button>새로고침</button>
+        <button onClick={handleFetchRoomData}>새로고침</button>
       </StyledTitleWrapper>
       <StyledRoomWrapper>
         {serverData.createdRoom.map((room) => (
@@ -48,15 +49,15 @@ const RoomList = ({
             </StyledRoom>
           </div>
         ))}
+        <StyledCreateRoom onClick={handleCreateRoomClick}>
+          Create a new Chat Room
+        </StyledCreateRoom>
       </StyledRoomWrapper>
-      <div onClick={handleCreateRoomClick}>Create a new Chat Room</div>
     </StyledContainer>
   );
 };
 
 const StyledContainer = styled.div`
-  overflow-y: auto;
-  overflow-x: hidden;
   box-sizing: border-box;
   &::-webkit-scrollbar {
     width: 8px;
@@ -75,8 +76,11 @@ const StyledTitleWrapper = styled.div`
 `;
 
 const StyledRoomWrapper = styled.div`
+  overflow-y: auto;
+  position: relative;
   background-color: #ffffff;
-  margin-top: 20px;
+  padding-top: 20px;
+  height: calc(100% - 130px);
 `;
 
 const StyledRoom = styled.div`
@@ -89,6 +93,18 @@ const StyledRoom = styled.div`
   cursor: pointer;
   &:hover {
     background-color: #c6c6f3;
+  }
+`;
+
+const StyledCreateRoom = styled.div`
+  position: sticky;
+  bottom: 0;
+  background-color: #ddd;
+  height: 40px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #aaa;
   }
 `;
 
