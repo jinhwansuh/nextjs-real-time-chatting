@@ -145,14 +145,13 @@ const Create: NextPageWithLayout = () => {
       <div>
         <button onClick={handleVideoClick}>비디오 연결하기</button>
         <button onClick={handleDisplayClick}>화면 공유하기</button>
+        <div onClick={handleStartStreaming}>방송 만들기</div>
       </div>
       <StreamingChattingArea
         chatListState={chatListState}
         roomId={room as string}
         currentSocket={currentSocket}
       ></StreamingChattingArea>
-
-      <div onClick={handleStartStreaming}>방송 만들기</div>
     </>
   );
 };

@@ -65,26 +65,27 @@ const StreamingChattingArea = ({
 const StyledChattingContainer = styled.div`
   overflow-y: auto;
   position: relative;
-  background-color: #eee;
-  width: 80%;
-  height: 200px;
+  /* background-color: #eee; */
+  width: 400px;
+  height: 500px;
 `;
 const StyledChattingWrapper = styled.div`
-  min-height: calc(100% - 25px);
+  min-height: calc(100% - 35px);
 `;
 const StyledForm = styled.form`
   position: sticky;
-  bottom: 0px;
+  bottom: 0;
   width: 100%;
   display: flex;
-  height: 25px;
+  height: 30px;
   background-color: #ffffff;
-  /* padding: 6px; */
   box-sizing: border-box;
 `;
 
 const StyledChatItem = styled.div`
-  background-color: #ababef;
+  margin: 5px 0;
+  background-color: #eee;
+  font-size: 18px;
 `;
 
 export default StreamingChattingArea;

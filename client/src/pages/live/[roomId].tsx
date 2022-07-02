@@ -102,17 +102,23 @@ const StreamingRoom: NextPageWithLayout = () => {
   return (
     <>
       <h1>스트리밍</h1>
-      <div>
-        <Video videoRef={videoRef} autoPlay playsInline muted />
-      </div>
-      <StreamingChattingArea
-        chatListState={chatListState}
-        roomId={roomId as string}
-        currentSocket={currentSocket}
-      ></StreamingChattingArea>
+      <StyledStreamingWrapper>
+        <div>
+          <Video videoRef={videoRef} autoPlay playsInline muted />
+        </div>
+        <StreamingChattingArea
+          chatListState={chatListState}
+          roomId={roomId as string}
+          currentSocket={currentSocket}
+        ></StreamingChattingArea>
+      </StyledStreamingWrapper>
     </>
   );
 };
+
+const StyledStreamingWrapper = styled.div`
+  display: flex;
+`;
 
 StreamingRoom.getLayout = function getLayout(page: ReactElement) {
   return <Layout>{page}</Layout>;
