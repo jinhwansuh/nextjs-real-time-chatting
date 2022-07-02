@@ -38,7 +38,6 @@ const Chat: NextPageWithLayout = () => {
     });
 
     socket.on(ChatEventActions.WELCOME, (data: ServerToClientInitData) => {
-      console.log(data);
       setServerState({ ...data });
     });
 
@@ -68,7 +67,7 @@ const Chat: NextPageWithLayout = () => {
     });
 
     return () => {
-      // socket.emit(ChatEventActions.LEAVE_PAGE, {});
+      // socket.emit(ChatEventActions.LEAVE_PAGE); // (서버에서) 유저가 만약 방이 있다면 메세지 날려주기
       socket.close();
     };
   }, []);
@@ -81,7 +80,7 @@ const Chat: NextPageWithLayout = () => {
     if (roomState.id !== room.id) {
       setRoomState(room);
       setChatListState([]);
-      if (roomState !== undefined)
+      if (roomState.id !== '')
         currentSocket?.emit(ChatEventActions.LEAVE_ROOM, {
           roomId: roomState.id,
           name: userState.name,
@@ -126,7 +125,10 @@ const Chat: NextPageWithLayout = () => {
         roomName: roomName,
       };
       currentSocket?.emit(ChatEventActions.CREATE_ROOM, data);
-      fetchRoomData();
+      setServerState((prev: any) => ({
+        ...prev,
+        createdRoom: [...prev?.createdRoom, { ...data, roomUser: [] }],
+      }));
       handleRoomChange({ id: data._id, name: data.roomName });
     }
   };
