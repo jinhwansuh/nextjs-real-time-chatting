@@ -27,7 +27,7 @@ const StreamingRoom: NextPageWithLayout = () => {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     };
 
-    const socket = io(`http://localhost:8000/streaming`);
+    const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
     socket.on('connect', () => {
       socket.emit(VideoEventActions.WATCHER, { roomId });

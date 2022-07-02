@@ -33,7 +33,7 @@ const Chat: NextPageWithLayout = () => {
   const userState = useRecoilValue(user);
 
   useEffect(() => {
-    const socket = io(`http://localhost:8000/chatting`, {
+    const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chatting`, {
       transports: ['websocket'],
     });
 
@@ -108,7 +108,9 @@ const Chat: NextPageWithLayout = () => {
   };
 
   const fetchRoomData = async () => {
-    const response = await axios.get('http://localhost:8000/chatting');
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/chatting`
+    );
     if (response.status === 200) {
       setServerState((prev: any) => ({
         ...prev,

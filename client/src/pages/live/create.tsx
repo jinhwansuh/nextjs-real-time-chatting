@@ -22,7 +22,7 @@ const Create: NextPageWithLayout = () => {
     const config = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     };
-    const socket = io(`http://localhost:8000/streaming`);
+    const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
     setCurrentSocket(socket);
     socket.on('connect', () => {
@@ -71,7 +71,7 @@ const Create: NextPageWithLayout = () => {
     });
     /* 
       TODO:
-      연결이 끊어졌을때 peer삭제
+      연결이 끊어졌을때 peer삭제, 끊어졌다는 알림
      */
 
     // socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {

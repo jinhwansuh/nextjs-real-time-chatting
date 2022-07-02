@@ -12,7 +12,9 @@ const Live: NextPage = () => {
 
   const fetchStreamingData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/streaming');
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`
+      );
       setStreamingData([...response.data]);
     } catch (e) {
       console.error(e);
