@@ -8,7 +8,8 @@ import { ServerStreamingRoom } from '../../types/streaming';
 
 const Live: NextPage = () => {
   const router = useRouter();
-  const [streamingData, setStreamingData] = useState<ServerStreamingRoom[]>();
+  const [streamingData, setStreamingData] = useState<ServerStreamingRoom[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchStreamingData = async () => {
     try {
@@ -18,6 +19,8 @@ const Live: NextPage = () => {
       setStreamingData([...response.data]);
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -25,23 +28,27 @@ const Live: NextPage = () => {
     fetchStreamingData();
   }, []);
 
-  if (!streamingData) {
-    return <div>방송중인 사람이 없습니다</div>;
+  if (isLoading) {
+    return <div>로딩중</div>;
   }
 
   return (
     <>
       <div>현재 방송들 : 222개</div>
-      <div>
-        {streamingData?.map((room) => (
-          <StyledRoomWrapper
-            key={room._id}
-            onClick={() => router.push(`/live/${room._id}`)}
-          >
-            방송 제목: {room.roomName} 스트리머: {room.streamer}
-          </StyledRoomWrapper>
-        ))}
-      </div>
+      <StyledStreamingRoomWrapper>
+        {streamingData.length === 0 ? (
+          <div>방송중인 사람이 없습니다</div>
+        ) : (
+          streamingData?.map((room) => (
+            <StyledStreamingRoom
+              key={room._id}
+              onClick={() => router.push(`/live/${room._id}`)}
+            >
+              방송 제목: {room.roomName} 스트리머: {room.streamer}
+            </StyledStreamingRoom>
+          ))
+        )}
+      </StyledStreamingRoomWrapper>
 
       <Link href="/live/create">
         <a>방송 생성하기</a>
@@ -52,7 +59,9 @@ const Live: NextPage = () => {
 
 const StyledRoomContainer = styled.div``;
 
-const StyledRoomWrapper = styled.div`
+const StyledStreamingRoomWrapper = styled.div``;
+
+const StyledStreamingRoom = styled.div`
   width: 200px;
   height: 200px;
   background-color: #ddd;
