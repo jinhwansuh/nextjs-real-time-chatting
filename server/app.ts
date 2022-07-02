@@ -9,12 +9,10 @@ import {
   ChatCreateRoomActionData,
   ChatEnterLeaveActionData,
   Message,
-  ServerChatRoom,
   ServerToClientData,
   ServerToClientInitData,
 } from '../client/src/types/chat';
 import { chatRoomList, streamingRoomList } from './src/utils/room';
-import { ServerStreamingRoom } from '../client/src/types/streaming';
 
 const app = express();
 const server = http.createServer(app);
@@ -66,7 +64,7 @@ chattingNamespace.on('connection', (socket) => {
 
     const serverToClientData: ServerToClientData = {
       ...data,
-      message: `${data.name}님이 입장하셨습니다.`,
+      message: `${data.name} joined the room`,
       clientsInRoom,
     };
     currentNameSpace
@@ -81,7 +79,7 @@ chattingNamespace.on('connection', (socket) => {
       chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
     const serverToClientData: ServerToClientData = {
       ...data,
-      message: `${data.name} 님이 퇴장하셨습니다.`,
+      message: `${data.name} left the room`,
       clientsInRoom,
     };
     socket
@@ -141,7 +139,7 @@ streamingNamespace.on('connection', (socket) => {
 
     const serverToClientData: ServerToClientData = {
       ...data,
-      message: `${data.name}님이 입장하셨습니다.`,
+      message: `${data.name} joined the room`,
       clientsInRoom,
     };
     currentNameSpace
@@ -156,7 +154,7 @@ streamingNamespace.on('connection', (socket) => {
       chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
     const serverToClientData: ServerToClientData = {
       ...data,
-      message: `${data.name} 님이 퇴장하셨습니다.`,
+      message: `${data.name} left the room`,
       clientsInRoom,
     };
     socket
@@ -165,7 +163,13 @@ streamingNamespace.on('connection', (socket) => {
   });
 
   socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
-    currentNameSpace.to(data.roomId).emit(ChatEventActions.CHAT_MESSAGE, data);
+    const newMessage: Message = {
+      ...data,
+      message: `${data.name} : ${data.message}`,
+    };
+    currentNameSpace
+      .to(data.roomId)
+      .emit(ChatEventActions.CHAT_MESSAGE, newMessage);
   });
 
   // Streaming Video communication
