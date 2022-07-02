@@ -20,24 +20,27 @@ const RoomList = ({
   return (
     <StyledContainer {...props}>
       <StyledTitleWrapper>
-        <div>전체 인원 : {serverData.allUserCount}</div>
+        <div>All Clients : {serverData.allUserCount}</div>
 
         {roomState.name === '' ? (
-          <div>
-            <strong>방을 선택해주세요</strong>
+          <div style={{ color: 'purple' }}>
+            <strong>Choose a Room</strong>
           </div>
         ) : (
           <div>
-            <strong>{roomState.name}</strong> 방 인원{' '}
-            <strong>{clientInRoom}</strong>
+            <strong>{clientInRoom}</strong> - clients in room [
+            <strong>{roomState.name}</strong>]
           </div>
         )}
-        <button onClick={handleFetchRoomData}>새로고침</button>
+        <StyledRefreshButton onClick={handleFetchRoomData}>
+          refresh
+        </StyledRefreshButton>
       </StyledTitleWrapper>
-      <StyledRoomWrapper>
-        {serverData.createdRoom.map((room) => (
-          <div key={room._id}>
+      <StyledContentsContainer>
+        <StyledRoomWrapper>
+          {serverData.createdRoom.map((room) => (
             <StyledRoom
+              key={room._id}
               onClick={() =>
                 handleRoomChange({
                   id: room._id,
@@ -47,12 +50,12 @@ const RoomList = ({
             >
               {room.roomName}
             </StyledRoom>
-          </div>
-        ))}
+          ))}
+        </StyledRoomWrapper>
         <StyledCreateRoom onClick={handleCreateRoomClick}>
           Create a new Chat Room
         </StyledCreateRoom>
-      </StyledRoomWrapper>
+      </StyledContentsContainer>
     </StyledContainer>
   );
 };
@@ -71,16 +74,33 @@ const StyledContainer = styled.div`
   }
 `;
 const StyledTitleWrapper = styled.div`
+  position: relative;
   background-color: #70b4f4;
-  min-height: 130px;
+  height: 130px;
+`;
+const StyledRefreshButton = styled.button`
+  position: absolute;
+  bottom: 10px;
+  width: 80%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  border: none;
+  background-color: #b9ddff;
+  cursor: pointer;
+  &:hover {
+    background-color: #e1aacb;
+  }
 `;
 
-const StyledRoomWrapper = styled.div`
+const StyledContentsContainer = styled.div`
   overflow-y: auto;
   position: relative;
   background-color: #ffffff;
   padding-top: 20px;
   height: calc(100% - 130px);
+`;
+const StyledRoomWrapper = styled.div`
+  min-height: calc(100% - (40px + 11px));
 `;
 
 const StyledRoom = styled.div`
@@ -88,7 +108,7 @@ const StyledRoom = styled.div`
   margin-bottom: 10px;
   width: 100%;
   height: 40px;
-  border: 1px solid black;
+  border: 1px solid #aaa;
   box-sizing: border-box;
   cursor: pointer;
   &:hover {
