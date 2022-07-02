@@ -45,9 +45,7 @@ const StreamingChattingArea = ({
       <StyledChattingContainer ref={chattingRef} {...props}>
         <StyledChattingWrapper>
           {chatListState.map((chat) => (
-            <StyledChatItem key={v4()}>
-              {chat.name} : {chat.message}
-            </StyledChatItem>
+            <StyledChatItem key={v4()}>{chat.message}</StyledChatItem>
           ))}
         </StyledChattingWrapper>
         <StyledForm onSubmit={handleChatSubmit}>
