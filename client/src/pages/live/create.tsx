@@ -5,6 +5,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import Layout from '../../components/layout';
+import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 import { NextPageWithLayout } from '../_app';
@@ -19,9 +20,6 @@ const Create: NextPageWithLayout = () => {
 
   useEffect(() => {
     const peerConnections: { [id: string]: RTCPeerConnection } = {};
-    const config = {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    };
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
     setCurrentSocket(socket);
@@ -38,7 +36,7 @@ const Create: NextPageWithLayout = () => {
 
     socket.on(VideoEventActions.WATCHER, (viewer) => {
       console.log(peerConnections);
-      peerConnections[viewer.id] = new RTCPeerConnection(config);
+      peerConnections[viewer.id] = new RTCPeerConnection(RTC_CONFIG);
 
       const stream = videoRef.current!.srcObject;
       (stream as MediaStream)

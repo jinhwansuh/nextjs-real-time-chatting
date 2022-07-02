@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import Layout from '../../components/layout';
+import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 import { NextPageWithLayout } from '../_app';
@@ -22,10 +23,6 @@ const StreamingRoom: NextPageWithLayout = () => {
   useEffect(() => {
     if (!roomId) return;
     let peerConnection: RTCPeerConnection;
-
-    const config = {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    };
 
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
@@ -53,7 +50,7 @@ const StreamingRoom: NextPageWithLayout = () => {
     });
 
     socket.on(VideoEventActions.OFFER, (id, description) => {
-      peerConnection = new RTCPeerConnection(config);
+      peerConnection = new RTCPeerConnection(RTC_CONFIG);
       peerConnection
         .setRemoteDescription(description)
         .then(() => peerConnection.createAnswer())
