@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "keywords": ["SocketIO", "WebRTC"],
   "dependencies": {
     "axios": "^0.27.2",
     "next": "12.1.6",
