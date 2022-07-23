@@ -9,9 +9,10 @@ import { ServerStreamingRoom } from '../../types/streaming';
 const Live: NextPage = () => {
   const router = useRouter();
   const [streamingData, setStreamingData] = useState<ServerStreamingRoom[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchStreamingData = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`
@@ -19,9 +20,8 @@ const Live: NextPage = () => {
       setStreamingData([...response.data]);
     } catch (e) {
       console.error(e);
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -35,6 +35,9 @@ const Live: NextPage = () => {
   return (
     <>
       <div>현재 방송들 : 222개</div>
+      <button onClick={fetchStreamingData} disabled={isLoading}>
+        새로고침
+      </button>
       <StyledStreamingRoomWrapper>
         {streamingData.length === 0 ? (
           <div>방송중인 사람이 없습니다</div>
