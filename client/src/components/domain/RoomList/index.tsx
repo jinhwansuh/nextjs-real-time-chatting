@@ -28,7 +28,7 @@ const RoomList = ({
           </div>
         ) : (
           <div>
-            <strong>{clientInRoom}</strong> - clients in room [
+            <strong>{clientInRoom}</strong> clients in room [
             <strong>{roomState.name}</strong>]
           </div>
         )}
