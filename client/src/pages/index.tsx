@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import Layout from '../components/layout';
 import type { NextPageWithLayout } from './_app';
 
-const Home: NextPageWithLayout = () => {
+const Home: NextPage = () => {
   return (
     <>
       <Head>
@@ -28,10 +28,6 @@ const Home: NextPageWithLayout = () => {
       </StyledContainer>
     </>
   );
-};
-
-Home.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
 };
 
 const StyledContainer = styled.main`
