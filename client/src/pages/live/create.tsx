@@ -1,7 +1,6 @@
 import { MouseEvent, ReactElement, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
-import { v4 as uuidV4 } from 'uuid';
 import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import Layout from '../../components/layout';
@@ -141,9 +140,19 @@ const Create: NextPageWithLayout = () => {
     <>
       <Video videoRef={videoRef} autoPlay />
       <div>
-        <button onClick={handleVideoClick}>비디오 연결하기</button>
-        <button onClick={handleDisplayClick}>화면 공유하기</button>
-        <div onClick={handleStartStreaming}>방송 만들기</div>
+        <button data-testid="videoConnect" onClick={handleVideoClick}>
+          비디오 연결하기
+        </button>
+        <button data-testid="screenConnect" onClick={handleDisplayClick}>
+          화면 공유하기
+        </button>
+        <button
+          disabled={!streamState}
+          data-testid="createButton"
+          onClick={handleStartStreaming}
+        >
+          방송 만들기
+        </button>
       </div>
       <StreamingChattingArea
         chatListState={chatListState}
