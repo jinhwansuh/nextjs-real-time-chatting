@@ -31,14 +31,25 @@ const Chat: NextPageWithLayout = () => {
   });
   const [chatInputState, setChatInputState] = useState('');
   const userState = useRecoilValue(user);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chatting`, {
       transports: ['websocket'],
     });
 
+    const errorHandle = setTimeout(() => {
+      if (!socket.connected) setIsLoading(false);
+    }, 3000);
+
     socket.on(ChatEventActions.WELCOME, (data: ServerToClientInitData) => {
-      setServerState({ ...data });
+      // 연결되면 바로 발생하는 이벤트
+      try {
+        setServerState({ ...data });
+      } finally {
+        setIsLoading(false);
+      }
     });
 
     setCurrentSocket(socket);
@@ -69,6 +80,7 @@ const Chat: NextPageWithLayout = () => {
     return () => {
       // socket.emit(ChatEventActions.LEAVE_PAGE); // (서버에서) 유저가 만약 방이 있다면 메세지 날려주기
       socket.close();
+      clearTimeout(errorHandle);
     };
   }, []);
 
@@ -138,6 +150,7 @@ const Chat: NextPageWithLayout = () => {
   return (
     <Main>
       <StyledRoomList
+        isLoading={isLoading}
         roomState={roomState}
         serverData={serverState}
         clientInRoom={clientInCurrentRoom}

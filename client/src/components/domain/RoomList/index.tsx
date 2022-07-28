@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { RoomListProps } from '../../../types/chat';
 
 const RoomList = ({
+  isLoading,
   serverData,
   roomState,
   clientInRoom,
@@ -10,7 +11,15 @@ const RoomList = ({
   handleCreateRoomClick,
   ...props
 }: RoomListProps) => {
-  if (!serverData) {
+  if (isLoading && !serverData) {
+    return (
+      <StyledContainer {...props}>
+        <div>로딩중.</div>
+      </StyledContainer>
+    );
+  }
+
+  if (!isLoading && !serverData) {
     return (
       <StyledContainer {...props}>
         <div>소켓 연결에 실패했습니다.</div>
@@ -20,7 +29,7 @@ const RoomList = ({
   return (
     <StyledContainer {...props}>
       <StyledTitleWrapper>
-        <div>All Clients : {serverData.allUserCount}</div>
+        <div>All Clients : {serverData?.allUserCount}</div>
 
         {roomState.name === '' ? (
           <div style={{ color: 'purple' }}>
@@ -38,7 +47,7 @@ const RoomList = ({
       </StyledTitleWrapper>
       <StyledContentsContainer>
         <StyledRoomWrapper>
-          {serverData.createdRoom.map((room) => (
+          {serverData?.createdRoom.map((room) => (
             <StyledRoom
               key={room._id}
               onClick={() =>
