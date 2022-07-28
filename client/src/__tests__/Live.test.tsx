@@ -5,12 +5,18 @@ import RoomId from '../pages/live/[roomId]';
 
 let user;
 
-jest.mock('uuid', () => 'eb7b7961-395d-4b4c-afc6-9ebcadaf0150');
+jest.mock('uuid', () => ({ v4: () => 'adfd01fb-309b-4e1c-9117-44d003f5d7fc' }));
 jest.mock('next/router', () => ({
   useRouter: () => ({
     query: { roomId: 'myValue' },
   }),
 }));
+beforeAll(() => {
+  sessionStorage.setItem('test--name', 'gfdg');
+});
+afterAll(() => {
+  sessionStorage.clear();
+});
 
 beforeAll(() => {
   // sessionStorage.setItem('test--name', 'john Doe');

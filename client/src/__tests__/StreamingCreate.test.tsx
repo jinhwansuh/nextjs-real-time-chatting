@@ -1,21 +1,29 @@
+import Router from 'next/router';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RecoilRoot } from 'recoil';
 import Create from '../pages/live/create';
+import React from 'react';
 
-jest.mock('uuid', () => 'eb7b7961-395d-4b4c-afc6-9ebcadaf0150');
+jest.mock('uuid', () => ({ v4: () => 'adfd01fb-309b-4e1c-9117-44d003f5d7fc' }));
 
-describe('a broadcaster start streaming', () => {
-  window.HTMLElement.prototype.scrollTo = function () {};
+beforeAll(() => {
+  sessionStorage.setItem('test--name', 'gfdg');
+});
+afterAll(() => {
+  sessionStorage.clear();
+});
+window.HTMLElement.prototype.scrollTo = function () {};
 
-  it('button should be disabled when first rendered', () => {
+describe('initial render', () => {
+  it('button should be disabled or not be disabled when first rendered', () => {
     render(
       <RecoilRoot>
         <Create />
       </RecoilRoot>
     );
-
     const createButtonEl = screen.getByTestId('createButton');
-
+    expect(screen.getByTestId('videoConnect')).not.toBeDisabled();
+    expect(screen.getByTestId('screenConnect')).not.toBeDisabled();
     expect(createButtonEl).toBeDisabled();
   });
 
@@ -25,9 +33,11 @@ describe('a broadcaster start streaming', () => {
         <Create />
       </RecoilRoot>
     );
-
     const createButtonEl = screen.getByTestId('createButton');
     fireEvent.click(screen.getByTestId('videoConnect'));
-    waitFor(() => expect(createButtonEl).not.toBeDisabled());
+
+    // await waitFor(() => expect(createButtonEl).not.toBeDisabled());
   });
 });
+
+describe('when broadcaster start broadcasting', () => {});
