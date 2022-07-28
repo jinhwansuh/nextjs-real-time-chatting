@@ -1,11 +1,9 @@
 import { NextPage } from 'next';
-import { MouseEvent, ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
-import Layout from '../../components/layout';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
+import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 
@@ -14,7 +12,7 @@ const Create: NextPage = () => {
   const [streamState, setStreamState] = useState<MediaStream>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const userState = useRecoilValue(user);
+  const userState = useUserState();
   const room = '123';
 
   useEffect(() => {

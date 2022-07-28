@@ -1,9 +1,7 @@
 import { NextPage } from 'next';
 import styled from 'styled-components';
-import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { user } from '../../atoms/user';
-import Layout from '../../components/layout';
 import {
   ChatCreateRoomActionData,
   Message,

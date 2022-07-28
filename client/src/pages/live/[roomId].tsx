@@ -1,19 +1,17 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
-import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
-import Layout from '../../components/layout';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
+import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 
 const StreamingRoom: NextPage = () => {
   const router = useRouter();
-  const userState = useRecoilValue(user);
+  const userState = useUserState();
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
