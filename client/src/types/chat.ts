@@ -44,6 +44,7 @@ export interface RoomState {
 }
 
 export interface RoomListProps extends Props {
+  isLoading: boolean;
   serverData: ServerToClientInitData | undefined;
   clientInRoom: number;
   roomState: RoomState;
