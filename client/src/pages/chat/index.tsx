@@ -1,10 +1,7 @@
 import { NextPage } from 'next';
 import styled from 'styled-components';
-import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { user } from '../../atoms/user';
-import Layout from '../../components/layout';
 import {
   ChatCreateRoomActionData,
   Message,
@@ -14,12 +11,12 @@ import {
   ServerToClientInitData,
 } from '../../types/chat';
 import { ChatEventActions } from '../../types/constants';
-import type { NextPageWithLayout } from '../_app';
 import { ChattingArea, RoomList } from '../../components/domain';
 import { v4 } from 'uuid';
 import axios from 'axios';
+import useUserState from '../../hooks/useUserState';
 
-const Chat: NextPageWithLayout = () => {
+const Chat: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [serverState, setServerState] = useState<ServerToClientInitData>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,15 +27,26 @@ const Chat: NextPageWithLayout = () => {
     name: '',
   });
   const [chatInputState, setChatInputState] = useState('');
-  const userState = useRecoilValue(user);
+  const userState = useUserState();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chatting`, {
       transports: ['websocket'],
     });
 
+    const errorHandle = setTimeout(() => {
+      if (!socket.connected) setIsLoading(false);
+    }, 3000);
+
     socket.on(ChatEventActions.WELCOME, (data: ServerToClientInitData) => {
-      setServerState({ ...data });
+      // 연결되면 바로 발생하는 이벤트
+      try {
+        setServerState({ ...data });
+      } finally {
+        setIsLoading(false);
+      }
     });
 
     setCurrentSocket(socket);
@@ -69,6 +77,7 @@ const Chat: NextPageWithLayout = () => {
     return () => {
       // socket.emit(ChatEventActions.LEAVE_PAGE); // (서버에서) 유저가 만약 방이 있다면 메세지 날려주기
       socket.close();
+      clearTimeout(errorHandle);
     };
   }, []);
 
@@ -138,6 +147,7 @@ const Chat: NextPageWithLayout = () => {
   return (
     <Main>
       <StyledRoomList
+        isLoading={isLoading}
         roomState={roomState}
         serverData={serverState}
         clientInRoom={clientInCurrentRoom}
@@ -170,9 +180,5 @@ const StyledRoomList = styled(RoomList)`
 const StyledChattingArea = styled(ChattingArea)`
   flex: 1;
 `;
-
-Chat.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
-};
 
 export default Chat;

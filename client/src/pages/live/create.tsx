@@ -1,21 +1,18 @@
-import { MouseEvent, ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { NextPage } from 'next';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { v4 as uuidV4 } from 'uuid';
-import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
-import Layout from '../../components/layout';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
+import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
-import { NextPageWithLayout } from '../_app';
 
-const Create: NextPageWithLayout = () => {
+const Create: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [streamState, setStreamState] = useState<MediaStream>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const userState = useRecoilValue(user);
+  const userState = useUserState();
   const room = '123';
 
   useEffect(() => {
@@ -127,7 +124,6 @@ const Create: NextPageWithLayout = () => {
   };
 
   const handleStartStreaming = () => {
-    console.log('클릭');
     currentSocket?.emit(VideoEventActions.BROADCASTER, room);
   };
 
@@ -141,9 +137,21 @@ const Create: NextPageWithLayout = () => {
     <>
       <Video videoRef={videoRef} autoPlay />
       <div>
-        <button onClick={handleVideoClick}>비디오 연결하기</button>
-        <button onClick={handleDisplayClick}>화면 공유하기</button>
-        <div onClick={handleStartStreaming}>방송 만들기</div>
+        <button data-testid="videoConnect" onClick={handleVideoClick}>
+          비디오 연결하기
+        </button>
+        <button data-testid="screenConnect" onClick={handleDisplayClick}>
+          화면 공유하기
+        </button>
+        <div>
+          <button
+            disabled={!streamState}
+            data-testid="createButton"
+            onClick={handleStartStreaming}
+          >
+            방송 만들기
+          </button>
+        </div>
       </div>
       <StreamingChattingArea
         chatListState={chatListState}
@@ -152,10 +160,6 @@ const Create: NextPageWithLayout = () => {
       ></StreamingChattingArea>
     </>
   );
-};
-
-Create.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
 };
 
 export default Create;

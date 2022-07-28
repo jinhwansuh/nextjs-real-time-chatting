@@ -1,20 +1,17 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
-import { user } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
-import Layout from '../../components/layout';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
+import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
-import { NextPageWithLayout } from '../_app';
 
-const StreamingRoom: NextPageWithLayout = () => {
+const StreamingRoom: NextPage = () => {
   const router = useRouter();
-  const userState = useRecoilValue(user);
+  const userState = useUserState();
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -116,9 +113,5 @@ const StreamingRoom: NextPageWithLayout = () => {
 const StyledStreamingWrapper = styled.div`
   display: flex;
 `;
-
-StreamingRoom.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
-};
 
 export default StreamingRoom;
