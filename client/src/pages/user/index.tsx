@@ -5,6 +5,7 @@ import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
 import { user } from '../../atoms/user';
+import { SESSION_USER_KEY } from '../../constants/sessionStorage';
 
 const UserNameForm: NextPage = () => {
   const [userState, setUserState] = useRecoilState(user);
@@ -13,7 +14,7 @@ const UserNameForm: NextPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const storedName = sessionStorage.getItem('test--name');
+    const storedName = sessionStorage.getItem(SESSION_USER_KEY);
     if (storedName) router.back();
   }, []);
 
@@ -22,7 +23,7 @@ const UserNameForm: NextPage = () => {
     const inputUserName = userName.trim();
     if (inputUserName !== '') {
       setUserState({ name: inputUserName, userSocketId: uuid });
-      sessionStorage.setItem('test--name', inputUserName);
+      sessionStorage.setItem(SESSION_USER_KEY, inputUserName);
       setUserName('');
       router.back();
     }
