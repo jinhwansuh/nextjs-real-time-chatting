@@ -1,3 +1,4 @@
+import { NextPage } from 'next';
 import { MouseEvent, ReactElement, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
@@ -7,9 +8,8 @@ import Layout from '../../components/layout';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
-import { NextPageWithLayout } from '../_app';
 
-const Create: NextPageWithLayout = () => {
+const Create: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [streamState, setStreamState] = useState<MediaStream>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
@@ -126,7 +126,6 @@ const Create: NextPageWithLayout = () => {
   };
 
   const handleStartStreaming = () => {
-    console.log('클릭');
     currentSocket?.emit(VideoEventActions.BROADCASTER, room);
   };
 
@@ -146,13 +145,15 @@ const Create: NextPageWithLayout = () => {
         <button data-testid="screenConnect" onClick={handleDisplayClick}>
           화면 공유하기
         </button>
-        <button
-          disabled={!streamState}
-          data-testid="createButton"
-          onClick={handleStartStreaming}
-        >
-          방송 만들기
-        </button>
+        <div>
+          <button
+            disabled={!streamState}
+            data-testid="createButton"
+            onClick={handleStartStreaming}
+          >
+            방송 만들기
+          </button>
+        </div>
       </div>
       <StreamingChattingArea
         chatListState={chatListState}
@@ -161,10 +162,6 @@ const Create: NextPageWithLayout = () => {
       ></StreamingChattingArea>
     </>
   );
-};
-
-Create.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
 };
 
 export default Create;

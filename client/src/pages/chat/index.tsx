@@ -1,7 +1,6 @@
 import { NextPage } from 'next';
 import styled from 'styled-components';
 import { FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import { user } from '../../atoms/user';
 import Layout from '../../components/layout';
@@ -14,12 +13,12 @@ import {
   ServerToClientInitData,
 } from '../../types/chat';
 import { ChatEventActions } from '../../types/constants';
-import type { NextPageWithLayout } from '../_app';
 import { ChattingArea, RoomList } from '../../components/domain';
 import { v4 } from 'uuid';
 import axios from 'axios';
+import useUserState from '../../hooks/useUserState';
 
-const Chat: NextPageWithLayout = () => {
+const Chat: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [serverState, setServerState] = useState<ServerToClientInitData>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +29,7 @@ const Chat: NextPageWithLayout = () => {
     name: '',
   });
   const [chatInputState, setChatInputState] = useState('');
-  const userState = useRecoilValue(user);
+  const userState = useUserState();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -183,9 +182,5 @@ const StyledRoomList = styled(RoomList)`
 const StyledChattingArea = styled(ChattingArea)`
   flex: 1;
 `;
-
-Chat.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
-};
 
 export default Chat;

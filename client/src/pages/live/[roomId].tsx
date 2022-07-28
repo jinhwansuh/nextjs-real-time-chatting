@@ -10,9 +10,8 @@ import Layout from '../../components/layout';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
-import { NextPageWithLayout } from '../_app';
 
-const StreamingRoom: NextPageWithLayout = () => {
+const StreamingRoom: NextPage = () => {
   const router = useRouter();
   const userState = useRecoilValue(user);
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -116,9 +115,5 @@ const StreamingRoom: NextPageWithLayout = () => {
 const StyledStreamingWrapper = styled.div`
   display: flex;
 `;
-
-StreamingRoom.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
-};
 
 export default StreamingRoom;
