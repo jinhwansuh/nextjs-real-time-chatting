@@ -6,6 +6,7 @@ import { v4 } from 'uuid';
 import { user } from '../../../atoms/user';
 import { Message } from '../../../types/chat';
 import { VideoEventActions } from '../../../types/constants';
+import ChatItem from './ChatItem';
 
 interface Props {
   chatListState: Message[];
@@ -27,6 +28,7 @@ const StreamingChattingArea = ({
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data: Message = {
+      id: v4(),
       name: userState.name,
       roomId: roomId as string,
       message: chatInputState,
@@ -44,18 +46,20 @@ const StreamingChattingArea = ({
     <>
       <StyledChattingContainer ref={chattingRef} {...props}>
         <StyledChattingWrapper>
+          <StyledChatTitle>Live Chat</StyledChatTitle>
+
           {chatListState.map((chat) => (
-            <StyledChatItem key={v4()}>{chat.message}</StyledChatItem>
+            <ChatItem key={chat.id} message={chat.message} />
           ))}
         </StyledChattingWrapper>
         <StyledForm onSubmit={handleChatSubmit}>
-          <input
+          <StyledInput
             value={chatInputState}
             onChange={(e) => setChatInputState(e.target.value)}
           />
-          <button type="submit" disabled={!chatInputState.trim().length}>
+          <StyledButton type="submit" disabled={!chatInputState.trim().length}>
             전송
-          </button>
+          </StyledButton>
         </StyledForm>
       </StyledChattingContainer>
     </>
@@ -65,16 +69,14 @@ const StreamingChattingArea = ({
 const StyledChattingContainer = styled.div`
   overflow-y: auto;
   position: relative;
-  /* background-color: #eee; */
   width: 400px;
   height: 500px;
 `;
 const StyledChattingWrapper = styled.div`
   min-height: calc(100% - 35px);
+  position: relative;
 `;
 const StyledForm = styled.form`
-  position: sticky;
-  bottom: 0;
   width: 100%;
   display: flex;
   height: 30px;
@@ -82,10 +84,20 @@ const StyledForm = styled.form`
   box-sizing: border-box;
 `;
 
-const StyledChatItem = styled.div`
-  margin: 5px 0;
-  background-color: #eee;
-  font-size: 18px;
+const StyledChatTitle = styled.div`
+  position: sticky;
+  top: 0;
+  height: 50px;
+  width: 100%;
+  background-color: #e4b889;
+  font-size: 25px;
+`;
+
+const StyledInput = styled.input`
+  width: calc(100% - 50px);
+`;
+const StyledButton = styled.button`
+  width: 50px;
 `;
 
 export default StreamingChattingArea;

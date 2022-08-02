@@ -15,7 +15,7 @@ const ChatItem = ({ message }: Props) => {
 
 const StyledChatItem = styled.div`
   margin: 5px 0;
-  background-color: #eee;
+  background-color: #f3efef;
   font-size: 18px;
 `;
 
