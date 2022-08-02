@@ -13,6 +13,7 @@ import {
   ServerToClientInitData,
 } from '../client/src/types/chat';
 import { chatRoomList, streamingRoomList } from './src/utils/room';
+import { v4 } from 'uuid';
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +65,7 @@ chattingNamespace.on('connection', (socket) => {
 
     const serverToClientData: ServerToClientData = {
       ...data,
+      id: v4(),
       message: `${data.name} joined the room`,
       clientsInRoom,
     };
@@ -79,6 +81,7 @@ chattingNamespace.on('connection', (socket) => {
       chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
     const serverToClientData: ServerToClientData = {
       ...data,
+      id: v4(),
       message: `${data.name} left the room`,
       clientsInRoom,
     };
@@ -139,6 +142,7 @@ streamingNamespace.on('connection', (socket) => {
 
     const serverToClientData: ServerToClientData = {
       ...data,
+      id: v4(),
       message: `${data.name} joined the room`,
       clientsInRoom,
     };
@@ -154,6 +158,7 @@ streamingNamespace.on('connection', (socket) => {
       chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
     const serverToClientData: ServerToClientData = {
       ...data,
+      id: v4(),
       message: `${data.name} left the room`,
       clientsInRoom,
     };
@@ -177,7 +182,9 @@ streamingNamespace.on('connection', (socket) => {
     // room: random unique string
     broadcasters[broadcasterRoomId] = socket.id;
     socket.join(broadcasterRoomId);
-    socket.broadcast.emit(VideoEventActions.BROADCASTER);
+    socket.broadcast
+      .to(broadcasters.broadcasterRoomId)
+      .emit(VideoEventActions.BROADCASTER);
   });
   socket.on(VideoEventActions.WATCHER, (user) => {
     socket.join(user.roomId);
