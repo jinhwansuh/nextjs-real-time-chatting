@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { ChattingAreaProps } from '../../../types/chat';
+import ChatItem from './ChatItem';
 
 function ChattingArea({
   chatList,
@@ -13,20 +14,18 @@ function ChattingArea({
   return (
     <StyledContainer {...props} ref={containerRef}>
       <StyledEmailWrapper>
-        {chatList?.map((chat) =>
-          mySocketId === chat.userSocketId ? (
-            <StyledMyMsgWrapper key={chat.id}>
-              {chat.message}
-            </StyledMyMsgWrapper>
-          ) : (
-            <StyledUserContainer key={chat.id}>
-              <div>
-                <StyledName>{chat.name}</StyledName>
-                <StyledFromUserWrapper>{chat.message}</StyledFromUserWrapper>
-              </div>
-            </StyledUserContainer>
-          )
-        )}
+        {chatList?.map((chat) => {
+          const fromMe = mySocketId === chat.userSocketId;
+
+          return (
+            <ChatItem
+              id={chat.id}
+              message={chat.message}
+              name={chat.name}
+              fromMe={fromMe}
+            />
+          );
+        })}
       </StyledEmailWrapper>
       <StyledForm onSubmit={handleChatSubmit}>
         <StyledTextArea
@@ -88,45 +87,6 @@ const StyledTextArea = styled.input`
 const StyledButton = styled.button`
   height: 100%;
   width: 45px;
-`;
-
-const StyledUserContainer = styled.div`
-  display: flex;
-  margin-top: 20px;
-`;
-
-const StyledFromUserWrapper = styled.div`
-  background-color: #ffffff;
-  max-width: 300px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border-top-left-radius: 0px;
-  position: relative;
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -8px;
-    width: 0px;
-    height: 0px;
-    border-left: 8px solid transparent;
-    border-top: 8px solid #eee;
-  }
-`;
-const StyledName = styled.span`
-  display: block;
-  font-size: 0.9em;
-  padding-bottom: 4px;
-`;
-
-const StyledMyMsgWrapper = styled.div`
-  background-color: #ffffff;
-  max-width: 300px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin-top: 20px;
-  align-self: flex-end;
-  word-break: break-word;
 `;
 
 export default ChattingArea;
