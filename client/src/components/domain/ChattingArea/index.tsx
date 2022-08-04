@@ -13,13 +13,13 @@ function ChattingArea({
   return (
     <StyledContainer {...props} ref={containerRef}>
       <StyledEmailWrapper>
-        {chatList?.map((chat, index) =>
+        {chatList?.map((chat) =>
           mySocketId === chat.userSocketId ? (
-            <StyledMyMsgWrapper key={chat.name + chat.message + index}>
+            <StyledMyMsgWrapper key={chat.id}>
               {chat.message}
             </StyledMyMsgWrapper>
           ) : (
-            <StyledUserContainer key={chat.name + chat.message + index}>
+            <StyledUserContainer key={chat.id}>
               <div>
                 <StyledName>{chat.name}</StyledName>
                 <StyledFromUserWrapper>{chat.message}</StyledFromUserWrapper>
