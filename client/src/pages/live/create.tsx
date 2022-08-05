@@ -2,6 +2,7 @@ import { NextPage } from 'next';
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { Text } from '../../components/base';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import useUserState from '../../hooks/useUserState';
@@ -150,9 +151,37 @@ const Create: NextPage = () => {
   return (
     <StyledMain>
       <StyledContainer>
-        <StyledTitle>
+        <StyledVideoWrapper>
           <div>
-            <Video videoRef={videoRef} autoPlay />
+            <Video width="400px" height="225px" videoRef={videoRef} autoPlay />
+            <StyledIsLiveWrapper>
+              <StyledIcon
+                style={{
+                  backgroundColor: streamData.isLive ? 'green' : 'grey',
+                }}
+              />
+              {streamData.isLive ? 'Live!' : `No Data`}
+            </StyledIsLiveWrapper>
+          </div>
+          <StyledDetailsWrapper>
+            <StyleTitle>Title</StyleTitle>
+            <StyledStreamDetails>
+              {streamData.isLive ? streamData.title : '-----'}
+            </StyledStreamDetails>
+            <StyledDetails>
+              <StyleTitle>
+                Concurrent viewers
+                <StyledStreamDetails> {currentViewer}</StyledStreamDetails>
+              </StyleTitle>
+
+              <StyleTitle>
+                Likes<StyledStreamDetails> asd</StyledStreamDetails>
+              </StyleTitle>
+            </StyledDetails>
+            <br />
+            <br />
+            <br />
+
             <div>
               <button data-testid="videoConnect" onClick={handleVideoClick}>
                 비디오 연결하기
@@ -169,44 +198,22 @@ const Create: NextPage = () => {
                   Go Streaming
                 </button>
               </div>
-              <div>
-                <StyledIcon
-                  style={{
-                    backgroundColor: streamData.isLive ? 'green' : 'grey',
-                  }}
-                />
-                {streamData.isLive ? 'Live!' : `No Data`}
-              </div>
             </div>
-          </div>
-          <div>
-            <div>
-              Title
-              <div> {streamData.isLive ? streamData.title : '-----'}</div>
-            </div>
-            <StyledDetails>
-              <div>
-                Concurrent viewers
-                <div> {currentViewer}</div>
-              </div>
-              <div>
-                Likes
-                <div> asd</div>
-              </div>
-            </StyledDetails>
-          </div>
-        </StyledTitle>
+          </StyledDetailsWrapper>
+        </StyledVideoWrapper>
 
         <StyledSettingWrapper>
-          STREAM SETTING
-          <div>
-            Stream URL
-            <div> {streamData.isLive ? streamData.streamURL : '-----'}</div>
-          </div>
-          <div>
-            Stream key
-            <div> {streamData.isLive ? streamData.streamKey : '-----'}</div>
-          </div>
+          <Text size={25} strong>
+            STREAM SETTINGS
+          </Text>
+          <StyleTitle>Stream URL</StyleTitle>
+          <StyledStreamDetails>
+            {streamData.isLive ? streamData.streamURL : '-----'}
+          </StyledStreamDetails>
+          <StyleTitle>Stream key</StyleTitle>
+          <StyledStreamDetails>
+            {streamData.isLive ? streamData.streamKey : '-----'}
+          </StyledStreamDetails>
         </StyledSettingWrapper>
       </StyledContainer>
 
@@ -231,14 +238,20 @@ const StyledDetails = styled.div`
   display: flex;
 `;
 
-const StyledTitle = styled.div`
+const StyledVideoWrapper = styled.div`
   display: flex;
+  padding: 20px;
   background-color: #eee;
 `;
 
 const StyledSettingWrapper = styled.div`
   margin-top: 20px;
+  padding: 15px;
   background-color: #eee;
+`;
+
+const StyledIsLiveWrapper = styled.div`
+  margin-top: 15px;
 `;
 
 const StyledIcon = styled.div`
@@ -248,6 +261,24 @@ const StyledIcon = styled.div`
   height: 20px;
   border-radius: 50%;
   margin-right: 10px;
+`;
+
+const StyledDetailsWrapper = styled.div`
+  width: 300px;
+  padding-left: 15px;
+`;
+
+const StyleTitle = styled.div`
+  margin-top: 10px;
+  font-size: 15px;
+  padding-left: 10px;
+  color: #eeeeeef;
+`;
+
+const StyledStreamDetails = styled.div`
+  font-size: 20px;
+  padding-left: 10px;
+  font-weight: bold;
 `;
 
 export default Create;
