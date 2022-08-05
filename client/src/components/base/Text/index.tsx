@@ -1,5 +1,4 @@
-import { ReactNode } from 'react';
-import './Text.css';
+import { memo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -48,14 +47,10 @@ const Text = ({
   }
 
   return (
-    <Tag
-      className={typeof size === 'string' ? `Text--size-${size}` : undefined}
-      style={{ ...rest.style, ...fontStyle }}
-      {...rest}
-    >
+    <Tag style={{ ...rest.style, ...fontStyle }} {...rest}>
       {children}
     </Tag>
   );
 };
 
-export default Text;
+export default memo(Text);
