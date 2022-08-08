@@ -3,6 +3,7 @@ export type ServerStreamingRoom = {
   streamer: string;
   roomName: string;
   roomUser: [];
+  isLive: boolean;
 };
 
 export interface ServerToClientStreamingInitData {

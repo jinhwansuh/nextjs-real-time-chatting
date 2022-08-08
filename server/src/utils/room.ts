@@ -25,5 +25,6 @@ export const streamingRoomList: ServerStreamingRoom[] = [
     streamer: 'jin',
     roomName: 'ma first Stream',
     roomUser: [],
+    isLive: true,
   },
 ];
