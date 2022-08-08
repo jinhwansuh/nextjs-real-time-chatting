@@ -2,8 +2,7 @@ import { CSSProperties, RefObject } from 'react';
 import styled from 'styled-components';
 
 interface Props {
-  width: string;
-  height: string;
+  width: number;
   videoRef: RefObject<HTMLVideoElement>;
   autoPlay?: boolean;
   playsInline?: boolean;
@@ -31,11 +30,9 @@ const Video = ({
   );
 };
 
-const StyledVideoWrapper = styled.div<
-  Pick<Props, 'width' | 'height' | 'backColor'>
->`
-  width: ${(props) => props.width};
-  height: ${(props) => props.height};
+const StyledVideoWrapper = styled.div<Pick<Props, 'width' | 'backColor'>>`
+  width: ${(props) => props.width}px;
+  height: ${(props) => props.width / 1.78}px;
   background-color: ${(props) => props.backColor || '#ccc'};
 `;
 
