@@ -46,6 +46,10 @@ const Live: NextPage = () => {
       <button onClick={fetchStreamingData} disabled={isLoading}>
         새로고침
       </button>
+      <Link href="/live/create">
+        <button>방송 생성하기</button>
+      </Link>
+
       <StyledStreamingRoomWrapper>
         {errorMessage ? (
           <div>{errorMessage}</div>
@@ -54,24 +58,24 @@ const Live: NextPage = () => {
         ) : (
           streamingData?.map((room) => (
             <StreamingRoomItem
+              key={room._id}
               _id={room._id}
               roomName={room.roomName}
               roomUser={room.roomUser}
               streamer={room.streamer}
+              isLive={room.isLive}
             />
           ))
         )}
       </StyledStreamingRoomWrapper>
-
-      <Link href="/live/create">
-        <button>방송 생성하기</button>
-      </Link>
     </>
   );
 };
 
 const StyledRoomContainer = styled.div``;
 
-const StyledStreamingRoomWrapper = styled.div``;
+const StyledStreamingRoomWrapper = styled.div`
+  display: flex;
+`;
 
 export default Live;
