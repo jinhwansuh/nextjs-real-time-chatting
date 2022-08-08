@@ -182,9 +182,7 @@ streamingNamespace.on('connection', (socket) => {
     // room: random unique string
     broadcasters[broadcasterRoomId] = socket.id;
     socket.join(broadcasterRoomId);
-    socket.broadcast
-      .to(broadcasters.broadcasterRoomId)
-      .emit(VideoEventActions.BROADCASTER);
+    socket.broadcast.emit(VideoEventActions.BROADCASTER);
   });
   socket.on(VideoEventActions.WATCHER, (user) => {
     socket.join(user.roomId);
