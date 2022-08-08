@@ -1,4 +1,5 @@
 import { NextPage } from 'next';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -9,7 +10,11 @@ import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 
-const StreamingRoom: NextPage = () => {
+interface Props {
+  title: string;
+}
+
+const StreamingRoom: NextPage<Props> = ({ title }) => {
   const router = useRouter();
   const userState = useUserState();
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -38,6 +43,7 @@ const StreamingRoom: NextPage = () => {
       setChatListState((prev) => [
         ...prev,
         {
+          id: data.id,
           userSocketId: data.userSocketId,
           name: data.name,
           roomId: data.roomId,
@@ -95,10 +101,14 @@ const StreamingRoom: NextPage = () => {
   //
   return (
     <>
-      <h1>스트리밍</h1>
+      <Head>
+        <title>{roomId ? roomId : title}</title>
+      </Head>
+
+      <h1>Streaming</h1>
       <StyledStreamingWrapper>
         <div>
-          <Video videoRef={videoRef} autoPlay playsInline muted />
+          <Video width={600} videoRef={videoRef} autoPlay playsInline muted />
         </div>
         <StreamingChattingArea
           chatListState={chatListState}
@@ -114,4 +124,7 @@ const StyledStreamingWrapper = styled.div`
   display: flex;
 `;
 
+StreamingRoom.getInitialProps = () => ({
+  title: 'Room',
+});
 export default StreamingRoom;

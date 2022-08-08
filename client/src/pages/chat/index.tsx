@@ -15,8 +15,10 @@ import { ChattingArea, RoomList } from '../../components/domain';
 import { v4 } from 'uuid';
 import axios from 'axios';
 import useUserState from '../../hooks/useUserState';
+import Head from 'next/head';
 
 const Chat: NextPage = () => {
+  const userState = useUserState();
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [serverState, setServerState] = useState<ServerToClientInitData>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,18 +29,19 @@ const Chat: NextPage = () => {
     name: '',
   });
   const [chatInputState, setChatInputState] = useState('');
-  const userState = useUserState();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
+    if (!userState.name) return;
+
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chatting`, {
       transports: ['websocket'],
     });
 
     const errorHandle = setTimeout(() => {
       if (!socket.connected) setIsLoading(false);
-    }, 3000);
+    }, 5000);
 
     socket.on(ChatEventActions.WELCOME, (data: ServerToClientInitData) => {
       // 연결되면 바로 발생하는 이벤트
@@ -56,6 +59,7 @@ const Chat: NextPage = () => {
       setChatListState((prev) => [
         ...prev,
         {
+          id: data.id,
           userSocketId: data.userSocketId,
           name: data.name,
           roomId: data.roomId,
@@ -75,11 +79,10 @@ const Chat: NextPage = () => {
     });
 
     return () => {
-      // socket.emit(ChatEventActions.LEAVE_PAGE); // (서버에서) 유저가 만약 방이 있다면 메세지 날려주기
       socket.close();
       clearTimeout(errorHandle);
     };
-  }, []);
+  }, [userState.name]);
 
   useEffect(() => {
     containerRef.current?.scrollTo(0, containerRef.current.scrollHeight);
@@ -107,6 +110,7 @@ const Chat: NextPage = () => {
     e.preventDefault();
     if (roomState.id !== '') {
       currentSocket?.emit(ChatEventActions.CHAT_MESSAGE, {
+        id: v4(),
         name: userState.name,
         roomId: roomState.id,
         message: chatInputState,
@@ -145,25 +149,30 @@ const Chat: NextPage = () => {
   };
 
   return (
-    <Main>
-      <StyledRoomList
-        isLoading={isLoading}
-        roomState={roomState}
-        serverData={serverState}
-        clientInRoom={clientInCurrentRoom}
-        handleFetchRoomData={fetchRoomData}
-        handleRoomChange={handleRoomChange}
-        handleCreateRoomClick={handleCreateRoomClick}
-      />
-      <StyledChattingArea
-        mySocketId={userState.userSocketId}
-        chatList={chatListState}
-        containerRef={containerRef}
-        handleChatSubmit={handleChatSubmit}
-        chatInputState={chatInputState}
-        setChatInputState={setChatInputState}
-      />
-    </Main>
+    <>
+      <Head>
+        <title>{'chat'}</title>
+      </Head>
+      <Main>
+        <StyledRoomList
+          isLoading={isLoading}
+          roomState={roomState}
+          serverData={serverState}
+          clientInRoom={clientInCurrentRoom}
+          handleFetchRoomData={fetchRoomData}
+          handleRoomChange={handleRoomChange}
+          handleCreateRoomClick={handleCreateRoomClick}
+        />
+        <StyledChattingArea
+          mySocketId={userState.userSocketId}
+          chatList={chatListState}
+          containerRef={containerRef}
+          handleChatSubmit={handleChatSubmit}
+          chatInputState={chatInputState}
+          setChatInputState={setChatInputState}
+        />
+      </Main>
+    </>
   );
 };
 const Main = styled.main`

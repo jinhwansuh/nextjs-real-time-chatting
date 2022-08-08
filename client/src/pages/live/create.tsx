@@ -1,6 +1,9 @@
 import { NextPage } from 'next';
+import Head from 'next/head';
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import styled from 'styled-components';
+import { Text } from '../../components/base';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import useUserState from '../../hooks/useUserState';
@@ -13,7 +16,14 @@ const Create: NextPage = () => {
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const userState = useUserState();
-  const room = '123';
+  const [streamData, setStreamData] = useState({
+    isLive: false,
+    title: '',
+    streamKey: '',
+    streamURL: '',
+  });
+  const [currentViewer, setCurrentViewer] = useState(0);
+  const roomId = '123';
 
   useEffect(() => {
     const peerConnections: { [id: string]: RTCPeerConnection } = {};
@@ -22,7 +32,7 @@ const Create: NextPage = () => {
     setCurrentSocket(socket);
     socket.on('connect', () => {
       socket.emit(VideoEventActions.ENTER_ROOM, {
-        roomId: room,
+        roomId: roomId,
         name: userState.name,
         userSocketId: userState.userSocketId,
       });
@@ -75,18 +85,11 @@ const Create: NextPage = () => {
     // });
 
     socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
-      setChatListState((prev) => [
-        ...prev,
-        {
-          userSocketId: data.userSocketId,
-          name: data.name,
-          roomId: data.roomId,
-          message: data.message,
-        },
-      ]);
+      setChatListState((prev) => [...prev, { ...data }]);
     });
 
     return () => {
+      // // socket.on(VideoEventActions.DISCONNECT_BROADCASTER, (id) => {})
       socket.close();
     };
   }, []);
@@ -107,6 +110,7 @@ const Create: NextPage = () => {
 
       e.currentTarget.disabled = true;
     } catch (e) {
+      return;
       // handleError(e);
     }
   };
@@ -124,7 +128,19 @@ const Create: NextPage = () => {
   };
 
   const handleStartStreaming = () => {
-    currentSocket?.emit(VideoEventActions.BROADCASTER, room);
+    try {
+      const title = prompt('write streaming title!');
+      if (title) {
+        currentSocket?.emit(VideoEventActions.BROADCASTER, roomId);
+        setStreamData((prev) => ({
+          ...prev,
+          isLive: true,
+          title: title,
+          streamKey: userState.userSocketId,
+          streamURL: `${window.location.origin}/live/${roomId}`,
+        }));
+      }
+    } catch (e) {}
   };
 
   /* 
@@ -135,31 +151,144 @@ const Create: NextPage = () => {
 
   return (
     <>
-      <Video videoRef={videoRef} autoPlay />
-      <div>
-        <button data-testid="videoConnect" onClick={handleVideoClick}>
-          비디오 연결하기
-        </button>
-        <button data-testid="screenConnect" onClick={handleDisplayClick}>
-          화면 공유하기
-        </button>
-        <div>
-          <button
-            disabled={!streamState}
-            data-testid="createButton"
-            onClick={handleStartStreaming}
-          >
-            방송 만들기
-          </button>
-        </div>
-      </div>
-      <StreamingChattingArea
-        chatListState={chatListState}
-        roomId={room as string}
-        currentSocket={currentSocket}
-      ></StreamingChattingArea>
+      <Head>
+        <title>{'create'}</title>
+      </Head>
+
+      <StyledMain>
+        <StyledContainer>
+          <StyledVideoWrapper>
+            <div>
+              <Video width={400} videoRef={videoRef} autoPlay />
+              <StyledIsLiveWrapper>
+                <StyledIcon
+                  style={{
+                    backgroundColor: streamData.isLive ? 'green' : 'grey',
+                  }}
+                />
+                {streamData.isLive ? 'Live!' : `No Data`}
+              </StyledIsLiveWrapper>
+            </div>
+            <StyledDetailsWrapper>
+              <StyleTitle>Title</StyleTitle>
+              <StyledStreamDetails>
+                {streamData.isLive ? streamData.title : '-----'}
+              </StyledStreamDetails>
+              <StyledDetails>
+                <StyleTitle>
+                  Concurrent viewers
+                  <StyledStreamDetails> {currentViewer}</StyledStreamDetails>
+                </StyleTitle>
+
+                <StyleTitle>
+                  Likes<StyledStreamDetails> asd</StyledStreamDetails>
+                </StyleTitle>
+              </StyledDetails>
+              <br />
+              <br />
+              <br />
+
+              <div>
+                <button data-testid="videoConnect" onClick={handleVideoClick}>
+                  비디오 연결하기
+                </button>
+                <button
+                  data-testid="screenConnect"
+                  onClick={handleDisplayClick}
+                >
+                  화면 공유하기
+                </button>
+                <div>
+                  <button
+                    disabled={!streamState || streamData.isLive}
+                    data-testid="createButton"
+                    onClick={handleStartStreaming}
+                  >
+                    Go Streaming
+                  </button>
+                </div>
+              </div>
+            </StyledDetailsWrapper>
+          </StyledVideoWrapper>
+
+          <StyledSettingWrapper>
+            <Text size={25} strong>
+              STREAM SETTINGS
+            </Text>
+            <StyleTitle>Stream URL</StyleTitle>
+            <StyledStreamDetails>
+              {streamData.isLive ? streamData.streamURL : '-----'}
+            </StyledStreamDetails>
+            <StyleTitle>Stream key</StyleTitle>
+            <StyledStreamDetails>
+              {streamData.isLive ? streamData.streamKey : '-----'}
+            </StyledStreamDetails>
+          </StyledSettingWrapper>
+        </StyledContainer>
+
+        <StreamingChattingArea
+          chatListState={chatListState}
+          roomId={roomId as string}
+          currentSocket={currentSocket}
+        ></StreamingChattingArea>
+      </StyledMain>
     </>
   );
 };
+
+const StyledMain = styled.main`
+  display: flex;
+`;
+
+const StyledContainer = styled.div`
+  margin-right: 20px;
+`;
+
+const StyledDetails = styled.div`
+  display: flex;
+`;
+
+const StyledVideoWrapper = styled.div`
+  display: flex;
+  padding: 20px;
+  background-color: #eee;
+`;
+
+const StyledSettingWrapper = styled.div`
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #eee;
+`;
+
+const StyledIsLiveWrapper = styled.div`
+  margin-top: 15px;
+`;
+
+const StyledIcon = styled.div`
+  display: inline-block;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 10px;
+`;
+
+const StyledDetailsWrapper = styled.div`
+  width: 300px;
+  padding-left: 15px;
+`;
+
+const StyleTitle = styled.div`
+  margin-top: 10px;
+  font-size: 15px;
+  padding-left: 10px;
+  color: #eeeeeef;
+`;
+
+const StyledStreamDetails = styled.div`
+  font-size: 20px;
+  padding-left: 10px;
+  font-weight: bold;
+`;
 
 export default Create;

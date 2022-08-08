@@ -22,8 +22,23 @@ export const chatRoomList: ServerChatRoom[] = [
 export const streamingRoomList: ServerStreamingRoom[] = [
   {
     _id: '123',
-    streamer: 'jin',
-    roomName: 'ma first Stream',
+    streamer: 'John Doe',
+    roomName: 'If you created a room, click this room to watch streaming',
     roomUser: [],
+    isLive: true,
+  },
+  {
+    _id: '567567',
+    streamer: 'Hong',
+    roomName: 'Dummy1',
+    roomUser: [],
+    isLive: false,
+  },
+  {
+    _id: '789789567',
+    streamer: 'Jae Won',
+    roomName: 'Dummy2',
+    roomUser: [],
+    isLive: true,
   },
 ];

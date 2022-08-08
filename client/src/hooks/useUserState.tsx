@@ -11,10 +11,12 @@ const useUserState = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const storedName = sessionStorage.getItem(SESSION_USER_KEY);
-    if (storedName) {
+    if (userState.name) return;
+
+    const storedName = window.sessionStorage.getItem(SESSION_USER_KEY);
+    if (storedName && !userState.name) {
       setUserState({ name: storedName, userSocketId: uuid });
-    } else {
+    } else if (!storedName) {
       router.push('/user');
     }
   }, []);

@@ -1,31 +1,40 @@
 import axios from 'axios';
 import { NextPage } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { StreamingRoomItem } from '../../components/domain';
 import { ServerStreamingRoom } from '../../types/streaming';
 
 const Live: NextPage = () => {
-  const router = useRouter();
   const [streamingData, setStreamingData] = useState<ServerStreamingRoom[]>([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchStreamingData = async () => {
+  const fetchStreamingData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
+      const response = await axios.get<ServerStreamingRoom[]>(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`
       );
       setStreamingData([...response.data]);
     } catch (e) {
+      setErrorMessage('서버와의 통신이 없습니다.');
       console.error(e);
     }
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchStreamingData();
+
+    //   const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
+
+    //   socket.on('someone_start-broadcasting', () => {
+    //     // someone start broadcasting, please click refresh button
+    //     // 메세지 띄우기
+    //   });
   }, []);
 
   if (isLoading) {
@@ -34,41 +43,44 @@ const Live: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <title>{'live'}</title>
+      </Head>
+
       <div>현재 방송들 : 222개</div>
       <button onClick={fetchStreamingData} disabled={isLoading}>
-        새로고침
+        refresh
       </button>
+      <Link href="/live/create">
+        <button>create a room</button>
+      </Link>
+
       <StyledStreamingRoomWrapper>
-        {streamingData.length === 0 ? (
+        {errorMessage ? (
+          <div>{errorMessage}</div>
+        ) : streamingData.length === 0 ? (
           <div>방송중인 사람이 없습니다</div>
         ) : (
           streamingData?.map((room) => (
-            <StyledStreamingRoom
+            <StreamingRoomItem
               key={room._id}
-              onClick={() => router.push(`/live/${room._id}`)}
-            >
-              방송 제목: {room.roomName} 스트리머: {room.streamer}
-            </StyledStreamingRoom>
+              _id={room._id}
+              roomName={room.roomName}
+              roomUser={room.roomUser}
+              streamer={room.streamer}
+              isLive={room.isLive}
+            />
           ))
         )}
       </StyledStreamingRoomWrapper>
-
-      <Link href="/live/create">
-        <a>방송 생성하기</a>
-      </Link>
     </>
   );
 };
 
 const StyledRoomContainer = styled.div``;
 
-const StyledStreamingRoomWrapper = styled.div``;
-
-const StyledStreamingRoom = styled.div`
-  width: 200px;
-  height: 200px;
-  background-color: #ddd;
-  cursor: pointer;
+const StyledStreamingRoomWrapper = styled.div`
+  display: flex;
 `;
 
 export default Live;

@@ -2,10 +2,12 @@ import { CSSProperties, RefObject } from 'react';
 import styled from 'styled-components';
 
 interface Props {
+  width: number;
   videoRef: RefObject<HTMLVideoElement>;
   autoPlay?: boolean;
   playsInline?: boolean;
   muted?: boolean;
+  backColor?: string;
   style?: CSSProperties;
 }
 
@@ -17,19 +19,26 @@ const Video = ({
   ...props
 }: Props) => {
   return (
-    <StyledVideo
-      {...props}
-      ref={videoRef}
-      autoPlay={autoPlay}
-      playsInline={playsInline}
-      muted={muted}
-    />
+    <StyledVideoWrapper {...props}>
+      <StyledVideo
+        ref={videoRef}
+        autoPlay={autoPlay}
+        playsInline={playsInline}
+        muted={muted}
+      />
+    </StyledVideoWrapper>
   );
 };
 
+const StyledVideoWrapper = styled.div<Pick<Props, 'width' | 'backColor'>>`
+  width: ${(props) => props.width}px;
+  height: ${(props) => props.width / 1.78}px;
+  background-color: ${(props) => props.backColor || '#ccc'};
+`;
+
 const StyledVideo = styled.video`
-  width: 500px;
-  height: 400px;
+  width: 100%;
+  height: 100%;
 `;
 
 export default Video;
