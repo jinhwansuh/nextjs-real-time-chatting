@@ -24,7 +24,7 @@ const StreamingRoomItem = ({
       <StyledDetailsWrapper>
         <Avatar src={'https://www.fillmurray.com/40/40'} />
         <StyledDetails>
-          <div> {roomName}</div>
+          <div style={{ fontWeight: 'bold' }}> {roomName}</div>
           <div> {streamer}</div>
           <div>{roomUser.length} watching </div>
         </StyledDetails>

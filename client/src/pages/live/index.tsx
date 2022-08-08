@@ -49,10 +49,10 @@ const Live: NextPage = () => {
 
       <div>현재 방송들 : 222개</div>
       <button onClick={fetchStreamingData} disabled={isLoading}>
-        새로고침
+        refresh
       </button>
       <Link href="/live/create">
-        <button>방송 생성하기</button>
+        <button>create a room</button>
       </Link>
 
       <StyledStreamingRoomWrapper>
