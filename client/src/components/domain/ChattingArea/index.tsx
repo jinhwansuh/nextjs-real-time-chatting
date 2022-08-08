@@ -19,6 +19,7 @@ function ChattingArea({
 
           return (
             <ChatItem
+              key={chat.id}
               id={chat.id}
               message={chat.message}
               name={chat.name}

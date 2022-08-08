@@ -12,9 +12,9 @@ const ChatItem = ({ id, message, name, fromMe }: ChatItemProps) => {
   return (
     <>
       {fromMe ? (
-        <StyledMyMsgWrapper key={id}>{message}</StyledMyMsgWrapper>
+        <StyledMyMsgWrapper>{message}</StyledMyMsgWrapper>
       ) : (
-        <StyledUserContainer key={id}>
+        <StyledUserContainer>
           <div>
             <StyledName>{name}</StyledName>
             <StyledFromUserWrapper>{message}</StyledFromUserWrapper>
