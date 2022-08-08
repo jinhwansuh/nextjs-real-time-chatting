@@ -1,4 +1,5 @@
 import { NextPage } from 'next';
+import Head from 'next/head';
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
@@ -149,80 +150,89 @@ const Create: NextPage = () => {
   */
 
   return (
-    <StyledMain>
-      <StyledContainer>
-        <StyledVideoWrapper>
-          <div>
-            <Video width="400px" height="225px" videoRef={videoRef} autoPlay />
-            <StyledIsLiveWrapper>
-              <StyledIcon
-                style={{
-                  backgroundColor: streamData.isLive ? 'green' : 'grey',
-                }}
-              />
-              {streamData.isLive ? 'Live!' : `No Data`}
-            </StyledIsLiveWrapper>
-          </div>
-          <StyledDetailsWrapper>
-            <StyleTitle>Title</StyleTitle>
-            <StyledStreamDetails>
-              {streamData.isLive ? streamData.title : '-----'}
-            </StyledStreamDetails>
-            <StyledDetails>
-              <StyleTitle>
-                Concurrent viewers
-                <StyledStreamDetails> {currentViewer}</StyledStreamDetails>
-              </StyleTitle>
+    <>
+      <Head>
+        <title>{'create'}</title>
+      </Head>
 
-              <StyleTitle>
-                Likes<StyledStreamDetails> asd</StyledStreamDetails>
-              </StyleTitle>
-            </StyledDetails>
-            <br />
-            <br />
-            <br />
-
+      <StyledMain>
+        <StyledContainer>
+          <StyledVideoWrapper>
             <div>
-              <button data-testid="videoConnect" onClick={handleVideoClick}>
-                비디오 연결하기
-              </button>
-              <button data-testid="screenConnect" onClick={handleDisplayClick}>
-                화면 공유하기
-              </button>
-              <div>
-                <button
-                  disabled={!streamState || streamData.isLive}
-                  data-testid="createButton"
-                  onClick={handleStartStreaming}
-                >
-                  Go Streaming
-                </button>
-              </div>
+              <Video width={400} videoRef={videoRef} autoPlay />
+              <StyledIsLiveWrapper>
+                <StyledIcon
+                  style={{
+                    backgroundColor: streamData.isLive ? 'green' : 'grey',
+                  }}
+                />
+                {streamData.isLive ? 'Live!' : `No Data`}
+              </StyledIsLiveWrapper>
             </div>
-          </StyledDetailsWrapper>
-        </StyledVideoWrapper>
+            <StyledDetailsWrapper>
+              <StyleTitle>Title</StyleTitle>
+              <StyledStreamDetails>
+                {streamData.isLive ? streamData.title : '-----'}
+              </StyledStreamDetails>
+              <StyledDetails>
+                <StyleTitle>
+                  Concurrent viewers
+                  <StyledStreamDetails> {currentViewer}</StyledStreamDetails>
+                </StyleTitle>
 
-        <StyledSettingWrapper>
-          <Text size={25} strong>
-            STREAM SETTINGS
-          </Text>
-          <StyleTitle>Stream URL</StyleTitle>
-          <StyledStreamDetails>
-            {streamData.isLive ? streamData.streamURL : '-----'}
-          </StyledStreamDetails>
-          <StyleTitle>Stream key</StyleTitle>
-          <StyledStreamDetails>
-            {streamData.isLive ? streamData.streamKey : '-----'}
-          </StyledStreamDetails>
-        </StyledSettingWrapper>
-      </StyledContainer>
+                <StyleTitle>
+                  Likes<StyledStreamDetails> asd</StyledStreamDetails>
+                </StyleTitle>
+              </StyledDetails>
+              <br />
+              <br />
+              <br />
 
-      <StreamingChattingArea
-        chatListState={chatListState}
-        roomId={roomId as string}
-        currentSocket={currentSocket}
-      ></StreamingChattingArea>
-    </StyledMain>
+              <div>
+                <button data-testid="videoConnect" onClick={handleVideoClick}>
+                  비디오 연결하기
+                </button>
+                <button
+                  data-testid="screenConnect"
+                  onClick={handleDisplayClick}
+                >
+                  화면 공유하기
+                </button>
+                <div>
+                  <button
+                    disabled={!streamState || streamData.isLive}
+                    data-testid="createButton"
+                    onClick={handleStartStreaming}
+                  >
+                    Go Streaming
+                  </button>
+                </div>
+              </div>
+            </StyledDetailsWrapper>
+          </StyledVideoWrapper>
+
+          <StyledSettingWrapper>
+            <Text size={25} strong>
+              STREAM SETTINGS
+            </Text>
+            <StyleTitle>Stream URL</StyleTitle>
+            <StyledStreamDetails>
+              {streamData.isLive ? streamData.streamURL : '-----'}
+            </StyledStreamDetails>
+            <StyleTitle>Stream key</StyleTitle>
+            <StyledStreamDetails>
+              {streamData.isLive ? streamData.streamKey : '-----'}
+            </StyledStreamDetails>
+          </StyledSettingWrapper>
+        </StyledContainer>
+
+        <StreamingChattingArea
+          chatListState={chatListState}
+          roomId={roomId as string}
+          currentSocket={currentSocket}
+        ></StreamingChattingArea>
+      </StyledMain>
+    </>
   );
 };
 

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { NextPage } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { StreamingRoomItem } from '../../components/domain';
 import { ServerStreamingRoom } from '../../types/streaming';
@@ -11,7 +12,7 @@ const Live: NextPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchStreamingData = async () => {
+  const fetchStreamingData = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await axios.get<ServerStreamingRoom[]>(
@@ -23,7 +24,7 @@ const Live: NextPage = () => {
       console.error(e);
     }
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchStreamingData();
@@ -42,6 +43,10 @@ const Live: NextPage = () => {
 
   return (
     <>
+      <Head>
+        <title>{'live'}</title>
+      </Head>
+
       <div>현재 방송들 : 222개</div>
       <button onClick={fetchStreamingData} disabled={isLoading}>
         새로고침

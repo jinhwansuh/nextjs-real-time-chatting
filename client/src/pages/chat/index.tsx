@@ -15,6 +15,7 @@ import { ChattingArea, RoomList } from '../../components/domain';
 import { v4 } from 'uuid';
 import axios from 'axios';
 import useUserState from '../../hooks/useUserState';
+import Head from 'next/head';
 
 const Chat: NextPage = () => {
   const userState = useUserState();
@@ -78,7 +79,6 @@ const Chat: NextPage = () => {
     });
 
     return () => {
-      // socket.emit(ChatEventActions.LEAVE_PAGE); // (서버에서) 유저가 만약 방이 있다면 메세지 날려주기
       socket.close();
       clearTimeout(errorHandle);
     };
@@ -149,25 +149,30 @@ const Chat: NextPage = () => {
   };
 
   return (
-    <Main>
-      <StyledRoomList
-        isLoading={isLoading}
-        roomState={roomState}
-        serverData={serverState}
-        clientInRoom={clientInCurrentRoom}
-        handleFetchRoomData={fetchRoomData}
-        handleRoomChange={handleRoomChange}
-        handleCreateRoomClick={handleCreateRoomClick}
-      />
-      <StyledChattingArea
-        mySocketId={userState.userSocketId}
-        chatList={chatListState}
-        containerRef={containerRef}
-        handleChatSubmit={handleChatSubmit}
-        chatInputState={chatInputState}
-        setChatInputState={setChatInputState}
-      />
-    </Main>
+    <>
+      <Head>
+        <title>{'chat'}</title>
+      </Head>
+      <Main>
+        <StyledRoomList
+          isLoading={isLoading}
+          roomState={roomState}
+          serverData={serverState}
+          clientInRoom={clientInCurrentRoom}
+          handleFetchRoomData={fetchRoomData}
+          handleRoomChange={handleRoomChange}
+          handleCreateRoomClick={handleCreateRoomClick}
+        />
+        <StyledChattingArea
+          mySocketId={userState.userSocketId}
+          chatList={chatListState}
+          containerRef={containerRef}
+          handleChatSubmit={handleChatSubmit}
+          chatInputState={chatInputState}
+          setChatInputState={setChatInputState}
+        />
+      </Main>
+    </>
   );
 };
 const Main = styled.main`
