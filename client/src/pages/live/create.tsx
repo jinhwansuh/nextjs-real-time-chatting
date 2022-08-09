@@ -93,7 +93,7 @@ const Create: NextPage = () => {
     });
 
     return () => {
-      // socket.emit(VideoEventActions.DISCONNECT_BROADCASTER, {roomId})
+      socket.emit(VideoEventActions.DISCONNECT_BROADCASTER, { roomId });
       socket.close();
     };
   }, [userState.name]);
