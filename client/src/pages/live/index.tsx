@@ -69,6 +69,8 @@ const Live: NextPage = () => {
               roomUser={room.roomUser}
               streamer={room.streamer}
               isLive={room.isLive}
+              thumbnailUrl="https://loremflickr.com/288/162"
+              avatarUrl={'https://www.fillmurray.com/40/40'}
             />
           ))
         )}
