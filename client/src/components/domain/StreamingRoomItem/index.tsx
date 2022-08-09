@@ -33,6 +33,7 @@ const StreamingRoomItem = ({
   );
 };
 const StyledRoomWrapper = styled.div`
+  width: 288px;
   margin: 15px;
 `;
 
