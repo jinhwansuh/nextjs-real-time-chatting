@@ -10,3 +10,9 @@ export interface ServerToClientStreamingInitData {
   allUserCount: number;
   createdRoom: ServerStreamingRoom[];
 }
+
+export interface MakeServerRoom {
+  roomId: string;
+  streamer: string;
+  roomName: string;
+}

@@ -69,6 +69,8 @@ const Live: NextPage = () => {
               roomUser={room.roomUser}
               streamer={room.streamer}
               isLive={room.isLive}
+              thumbnailUrl="https://loremflickr.com/288/162"
+              avatarUrl={'https://www.fillmurray.com/40/40'}
             />
           ))
         )}
@@ -81,6 +83,7 @@ const StyledRoomContainer = styled.div``;
 
 const StyledStreamingRoomWrapper = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 export default Live;

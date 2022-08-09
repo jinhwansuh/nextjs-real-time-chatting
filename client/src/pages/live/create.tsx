@@ -1,14 +1,16 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
 import { Text } from '../../components/base';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
 import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
+import { MakeServerRoom } from '../../types/streaming';
 
 const Create: NextPage = () => {
   const [currentSocket, setCurrentSocket] = useState<Socket>();
@@ -23,9 +25,11 @@ const Create: NextPage = () => {
     streamURL: '',
   });
   const [currentViewer, setCurrentViewer] = useState(0);
-  const roomId = '123';
+  const roomId = useMemo(() => v4(), []);
 
   useEffect(() => {
+    if (!userState.name) return;
+
     const peerConnections: { [id: string]: RTCPeerConnection } = {};
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
@@ -89,10 +93,10 @@ const Create: NextPage = () => {
     });
 
     return () => {
-      // // socket.on(VideoEventActions.DISCONNECT_BROADCASTER, (id) => {})
+      socket.emit(VideoEventActions.DISCONNECT_BROADCASTER, { roomId });
       socket.close();
     };
-  }, []);
+  }, [userState.name]);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -131,6 +135,11 @@ const Create: NextPage = () => {
     try {
       const title = prompt('write streaming title!');
       if (title) {
+        currentSocket?.emit(VideoEventActions.MAKE_ROOM, {
+          roomId,
+          roomName: title,
+          streamer: userState.name,
+        } as MakeServerRoom);
         currentSocket?.emit(VideoEventActions.BROADCASTER, roomId);
         setStreamData((prev) => ({
           ...prev,

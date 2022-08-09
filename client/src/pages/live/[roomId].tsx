@@ -88,6 +88,11 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
       socket.emit(VideoEventActions.WATCHER, { roomId });
     });
 
+    socket.on(VideoEventActions.DISCONNECT_BROADCASTER, () => {
+      alert('방장이 방송을 종료했습니다.');
+      router.replace('/live');
+    });
+
     return () => {
       socket.emit(VideoEventActions.LEAVE_ROOM, {
         roomId,
@@ -96,7 +101,7 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
       });
       socket.close();
     };
-  }, [roomId]);
+  }, [roomId, userState.name]);
 
   //
   return (

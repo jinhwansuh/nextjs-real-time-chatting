@@ -4,13 +4,20 @@ import styled from 'styled-components';
 import { ServerStreamingRoom } from '../../../types/streaming';
 import { Avatar } from '../../base';
 
+interface Props extends ServerStreamingRoom {
+  avatarUrl: string;
+  thumbnailUrl: string;
+}
+
 const StreamingRoomItem = ({
   _id,
   roomName,
   roomUser,
   streamer,
   isLive,
-}: ServerStreamingRoom) => {
+  avatarUrl,
+  thumbnailUrl,
+}: Props) => {
   const router = useRouter();
 
   return (
@@ -18,11 +25,12 @@ const StreamingRoomItem = ({
       <StyledStreamingRoom
         key={_id}
         onClick={() => router.push(`/live/${_id}`)}
+        style={{ backgroundImage: `url(${thumbnailUrl})` }}
       >
         {isLive && <StyledIsLive>L I V E</StyledIsLive>}
       </StyledStreamingRoom>
       <StyledDetailsWrapper>
-        <Avatar src={'https://www.fillmurray.com/40/40'} />
+        <Avatar src={avatarUrl} />
         <StyledDetails>
           <div style={{ fontWeight: 'bold' }}> {roomName}</div>
           <div> {streamer}</div>
@@ -33,6 +41,7 @@ const StreamingRoomItem = ({
   );
 };
 const StyledRoomWrapper = styled.div`
+  width: 288px;
   margin: 15px;
 `;
 
@@ -41,7 +50,6 @@ const StyledStreamingRoom = styled.div`
   width: 288px;
   height: ${288 / 1.78}px;
   background-color: #ddd;
-  background-image: url('https://loremflickr.com/288/162');
   cursor: pointer;
 `;
 
