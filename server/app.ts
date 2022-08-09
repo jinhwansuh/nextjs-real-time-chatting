@@ -218,6 +218,15 @@ streamingNamespace.on('connection', (socket) => {
   socket.on(VideoEventActions.CANDIDATE, (id, message) => {
     socket.to(id).emit(VideoEventActions.CANDIDATE, socket.id, message);
   });
+
+  socket.on(VideoEventActions.DISCONNECT_BROADCASTER, ({ roomId }) => {
+    console.log(roomId);
+    const roomIndex = streamingRoomList.findIndex(
+      (room) => room._id === roomId
+    );
+    streamingRoomList.splice(roomIndex, 1);
+    socket.broadcast.to(roomId).emit(VideoEventActions.DISCONNECT_BROADCASTER);
+  });
 });
 
 server.listen(PORT, () => {
