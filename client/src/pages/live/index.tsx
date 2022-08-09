@@ -83,6 +83,7 @@ const StyledRoomContainer = styled.div``;
 
 const StyledStreamingRoomWrapper = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 export default Live;
