@@ -28,6 +28,8 @@ const Create: NextPage = () => {
   const roomId = useMemo(() => v4(), []);
 
   useEffect(() => {
+    if (!userState.name) return;
+
     const peerConnections: { [id: string]: RTCPeerConnection } = {};
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
@@ -94,7 +96,7 @@ const Create: NextPage = () => {
       // socket.emit(VideoEventActions.DISCONNECT_BROADCASTER, {roomId})
       socket.close();
     };
-  }, []);
+  }, [userState.name]);
 
   useEffect(() => {
     if (videoRef.current) {

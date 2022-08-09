@@ -96,7 +96,7 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
       });
       socket.close();
     };
-  }, [roomId]);
+  }, [roomId, userState.name]);
 
   //
   return (
