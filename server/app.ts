@@ -14,6 +14,7 @@ import {
 } from '../client/src/types/chat';
 import { chatRoomList, streamingRoomList } from './src/utils/room';
 import { v4 } from 'uuid';
+import { MakeServerRoom } from '../client/src/types/streaming';
 
 const app = express();
 const server = http.createServer(app);
@@ -134,22 +135,25 @@ streamingNamespace.on('connection', (socket) => {
 
   // Streaming Channel communication 수정 필요
 
-  socket.on(VideoEventActions.ENTER_ROOM, (data: Message) => {
-    socket.join(data.roomId);
+  socket.on(
+    VideoEventActions.ENTER_ROOM,
+    (data: Pick<Message, 'roomId' | 'name' | 'userSocketId'>) => {
+      socket.join(data.roomId);
 
-    const clientsInRoom =
-      chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0; // 방 유저
+      const clientsInRoom =
+        chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0; // 방 유저
 
-    const serverToClientData: ServerToClientData = {
-      ...data,
-      id: v4(),
-      message: `${data.name} joined the room`,
-      clientsInRoom,
-    };
-    currentNameSpace
-      .to(data.roomId)
-      .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
-  });
+      const serverToClientData: ServerToClientData = {
+        ...data,
+        id: v4(),
+        message: `${data.name} joined the room`,
+        clientsInRoom,
+      };
+      currentNameSpace
+        .to(data.roomId)
+        .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
+    }
+  );
 
   socket.on(VideoEventActions.LEAVE_ROOM, (data: Message) => {
     socket.leave(data.roomId);
@@ -178,6 +182,20 @@ streamingNamespace.on('connection', (socket) => {
   });
 
   // Streaming Video communication
+
+  socket.on(
+    VideoEventActions.MAKE_ROOM,
+    ({ roomId, streamer, roomName }: MakeServerRoom) => {
+      streamingRoomList.unshift({
+        _id: roomId,
+        streamer,
+        roomName,
+        roomUser: [],
+        isLive: true,
+      });
+    }
+  );
+
   socket.on(VideoEventActions.BROADCASTER, (broadcasterRoomId: string) => {
     // room: random unique string
     broadcasters[broadcasterRoomId] = socket.id;
