@@ -69,7 +69,7 @@ const StreamingChattingArea = ({
 const StyledChattingContainer = styled.div`
   overflow-y: auto;
   position: relative;
-  width: 400px;
+  min-width: 350px;
   height: 500px;
 `;
 const StyledChattingWrapper = styled.div`

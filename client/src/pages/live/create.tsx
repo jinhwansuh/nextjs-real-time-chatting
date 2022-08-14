@@ -164,7 +164,7 @@ const Create: NextPage = () => {
         <title>{'create'}</title>
       </Head>
 
-      <StyledMain>
+      <main>
         <StyledContainer>
           <StyledVideoWrapper>
             <div>
@@ -190,7 +190,7 @@ const Create: NextPage = () => {
                 </StyleTitle>
 
                 <StyleTitle>
-                  Likes<StyledStreamDetails> asd</StyledStreamDetails>
+                  Likes<StyledStreamDetails> 0</StyledStreamDetails>
                 </StyleTitle>
               </StyledDetails>
               <br />
@@ -240,17 +240,14 @@ const Create: NextPage = () => {
           roomId={roomId as string}
           currentSocket={currentSocket}
         ></StreamingChattingArea>
-      </StyledMain>
+      </main>
     </>
   );
 };
 
-const StyledMain = styled.main`
-  display: flex;
-`;
-
 const StyledContainer = styled.div`
   margin-right: 20px;
+  min-width: 650px;
 `;
 
 const StyledDetails = styled.div`
