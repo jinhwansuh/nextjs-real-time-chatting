@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { v4 } from 'uuid';
-import { user } from '../atoms/user';
+import { userStateAtom } from '../atoms/user';
 import { AuthForm } from '../components/domain';
 import { SESSION_USER_KEY } from '../constants/sessionStorage';
 
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const AuthLayout = ({ children }: Props) => {
-  const [userState, setUserState] = useRecoilState(user);
+  const [userState, setUserState] = useRecoilState(userStateAtom);
   const [initPageLoading, setInitPageLoading] = useState(true);
   const uuid = useMemo(() => v4(), []);
 

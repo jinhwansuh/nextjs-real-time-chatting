@@ -1,13 +1,14 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
+import { userStateAtom } from '../../atoms/user';
 import { Text } from '../../components/base';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
-import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 import { MakeServerRoom } from '../../types/streaming';
@@ -17,7 +18,7 @@ const Create: NextPage = () => {
   const [streamState, setStreamState] = useState<MediaStream>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const userState = useUserState();
+  const userState = useRecoilValue(userStateAtom);
   const [streamData, setStreamData] = useState({
     isLive: false,
     title: '',
@@ -46,7 +47,6 @@ const Create: NextPage = () => {
     });
 
     socket.on(VideoEventActions.WATCHER, (viewer) => {
-      console.log(peerConnections);
       peerConnections[viewer.id] = new RTCPeerConnection(RTC_CONFIG);
 
       const stream = videoRef.current!.srcObject;
@@ -83,10 +83,10 @@ const Create: NextPage = () => {
       연결이 끊어졌을때 peer삭제, 끊어졌다는 알림
      */
 
-    // socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
-    //   peerConnections[id].close();
-    //   delete peerConnections[id];
-    // });
+    socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
+      peerConnections[id].close();
+      delete peerConnections[id];
+    });
 
     socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
       setChatListState((prev) => [...prev, { ...data }]);

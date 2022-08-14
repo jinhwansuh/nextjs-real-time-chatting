@@ -14,11 +14,12 @@ import { ChatEventActions } from '../../types/constants';
 import { ChattingArea, RoomList } from '../../components/domain';
 import { v4 } from 'uuid';
 import axios from 'axios';
-import useUserState from '../../hooks/useUserState';
 import Head from 'next/head';
+import { useRecoilValue } from 'recoil';
+import { userStateAtom } from '../../atoms/user';
 
 const Chat: NextPage = () => {
-  const userState = useUserState();
+  const userState = useRecoilValue(userStateAtom);
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [serverState, setServerState] = useState<ServerToClientInitData>();
   const containerRef = useRef<HTMLDivElement>(null);

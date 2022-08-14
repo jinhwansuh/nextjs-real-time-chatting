@@ -2,11 +2,12 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
+import { userStateAtom } from '../../atoms/user';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
-import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 
@@ -16,7 +17,7 @@ interface Props {
 
 const StreamingRoom: NextPage<Props> = ({ title }) => {
   const router = useRouter();
-  const userState = useUserState();
+  const userState = useRecoilValue(userStateAtom);
   const [currentSocket, setCurrentSocket] = useState<Socket>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -90,7 +91,9 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
 
     socket.on(VideoEventActions.DISCONNECT_BROADCASTER, () => {
       alert('방장이 방송을 종료했습니다.');
-      router.replace('/live');
+      setTimeout(() => {
+        router.replace('/live');
+      }, 3000);
     });
 
     return () => {

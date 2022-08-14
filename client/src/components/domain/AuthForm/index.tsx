@@ -2,11 +2,11 @@ import { FormEvent, useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
-import { user } from '../../../atoms/user';
+import { userStateAtom } from '../../../atoms/user';
 import { SESSION_USER_KEY } from '../../../constants/sessionStorage';
 
 const AuthForm = () => {
-  const [userState, setUserState] = useRecoilState(user);
+  const [userState, setUserState] = useRecoilState(userStateAtom);
   const [userName, setUserName] = useState('');
   const uuid = useMemo(() => v4(), []);
 
