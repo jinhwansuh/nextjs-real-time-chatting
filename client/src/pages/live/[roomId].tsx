@@ -112,18 +112,19 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
       <Head>
         <title>{roomId ? roomId : title}</title>
       </Head>
-
       <h1>Streaming</h1>
-      <StyledStreamingWrapper>
-        <div>
-          <Video width={600} videoRef={videoRef} autoPlay playsInline muted />
-        </div>
-        <StreamingChattingArea
-          chatListState={chatListState}
-          roomId={roomId as string}
-          currentSocket={currentSocket}
-        ></StreamingChattingArea>
-      </StyledStreamingWrapper>
+      <main>
+        <StyledStreamingWrapper>
+          <div>
+            <Video width={600} videoRef={videoRef} autoPlay playsInline muted />
+          </div>
+          <StreamingChattingArea
+            chatListState={chatListState}
+            roomId={roomId as string}
+            currentSocket={currentSocket}
+          ></StreamingChattingArea>
+        </StyledStreamingWrapper>
+      </main>
     </>
   );
 };
