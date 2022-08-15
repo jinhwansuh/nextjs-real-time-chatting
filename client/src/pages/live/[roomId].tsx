@@ -104,9 +104,8 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
       });
       socket.close();
     };
-  }, [roomId, userState.name]);
+  }, [roomId]);
 
-  //
   return (
     <>
       <Head>
