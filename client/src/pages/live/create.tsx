@@ -1,6 +1,13 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
-import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
@@ -102,32 +109,38 @@ const Create: NextPage = () => {
     }
   }, [streamState]);
 
-  const handleVideoClick = async (e: MouseEvent<HTMLButtonElement>) => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: true,
-      });
-      setStreamState(stream);
+  const handleVideoClick = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: true,
+        });
+        setStreamState(stream);
 
-      e.currentTarget.disabled = true;
-    } catch (e) {
-      return;
-      // handleError(e);
-    }
-  };
-  const handleDisplayClick = async (e: MouseEvent<HTMLButtonElement>) => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-      });
-      setStreamState(stream);
+        e.currentTarget.disabled = true;
+      } catch (e) {
+        return;
+        // handleError(e);
+      }
+    },
+    []
+  );
+  const handleDisplayClick = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
+        setStreamState(stream);
 
-      e.currentTarget.disabled = true;
-    } catch (e) {
-      // handleError(e);
-    }
-  };
+        e.currentTarget.disabled = true;
+      } catch (e) {
+        // handleError(e);
+      }
+    },
+    []
+  );
 
   const handleStartStreaming = () => {
     try {
