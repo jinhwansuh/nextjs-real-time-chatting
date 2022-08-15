@@ -47,7 +47,7 @@ const Live: NextPage = () => {
         <title>{'live'}</title>
       </Head>
 
-      <div>현재 방송들 : 222개</div>
+      <div>현재 방송들 : {streamingData.length}개</div>
       <button onClick={fetchStreamingData} disabled={isLoading}>
         refresh
       </button>

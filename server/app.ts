@@ -130,7 +130,6 @@ streamingNamespace.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('someone disconnected streamingChannel', socket.id);
-    // socket.to(broadcaster).emit(VideoEventActions.DISCONNECT_PEER, socket.id);
   });
 
   // Streaming Channel communication 수정 필요
@@ -157,7 +156,13 @@ streamingNamespace.on('connection', (socket) => {
 
   socket.on(VideoEventActions.LEAVE_ROOM, (data: Message) => {
     socket.leave(data.roomId);
-
+    /* 
+    {
+        roomId,
+        name: userState.name,
+        userSocketId: userState.userSocketId,
+      }
+*/
     const clientsInRoom =
       chattingNamespace.adapter.rooms.get(data.roomId)?.size || 0;
     const serverToClientData: ServerToClientData = {
@@ -166,9 +171,14 @@ streamingNamespace.on('connection', (socket) => {
       message: `${data.name} left the room`,
       clientsInRoom,
     };
+    // socket.to(broadcasters[user.roomId]).emit(VideoEventActions.WATCHER, user);
     socket
       .to(data.roomId)
-      .emit(ChatEventActions.CHAT_MESSAGE, serverToClientData);
+      .emit(VideoEventActions.CHAT_MESSAGE, serverToClientData);
+
+    socket.broadcast
+      .to(data.roomId)
+      .emit(VideoEventActions.DISCONNECT_PEER, socket.id);
   });
 
   socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
@@ -178,7 +188,7 @@ streamingNamespace.on('connection', (socket) => {
     };
     currentNameSpace
       .to(data.roomId)
-      .emit(ChatEventActions.CHAT_MESSAGE, newMessage);
+      .emit(VideoEventActions.CHAT_MESSAGE, newMessage);
   });
 
   // Streaming Video communication
@@ -220,12 +230,15 @@ streamingNamespace.on('connection', (socket) => {
   });
 
   socket.on(VideoEventActions.DISCONNECT_BROADCASTER, ({ roomId }) => {
-    console.log(roomId);
     const roomIndex = streamingRoomList.findIndex(
       (room) => room._id === roomId
     );
-    streamingRoomList.splice(roomIndex, 1);
-    socket.broadcast.to(roomId).emit(VideoEventActions.DISCONNECT_BROADCASTER);
+    if (roomIndex >= 0) {
+      streamingRoomList.splice(roomIndex, 1);
+      socket.broadcast
+        .to(roomId)
+        .emit(VideoEventActions.DISCONNECT_BROADCASTER);
+    }
   });
 });
 

@@ -1,22 +1,14 @@
-import { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
-import { user } from '../../atoms/user';
-import { SESSION_USER_KEY } from '../../constants/sessionStorage';
+import { userStateAtom } from '../../../atoms/user';
+import { SESSION_USER_KEY } from '../../../constants/sessionStorage';
 
-const UserNameForm: NextPage = () => {
-  const [userState, setUserState] = useRecoilState(user);
+const AuthForm = () => {
+  const [userState, setUserState] = useRecoilState(userStateAtom);
   const [userName, setUserName] = useState('');
   const uuid = useMemo(() => v4(), []);
-  const router = useRouter();
-
-  useEffect(() => {
-    const storedName = sessionStorage.getItem(SESSION_USER_KEY);
-    if (storedName) router.back();
-  }, []);
 
   const handleUserName = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +17,6 @@ const UserNameForm: NextPage = () => {
       setUserState({ name: inputUserName, userSocketId: uuid });
       sessionStorage.setItem(SESSION_USER_KEY, inputUserName);
       setUserName('');
-      router.back();
     }
   };
 
@@ -82,8 +73,8 @@ const StyledButton = styled.button`
   padding-left: 20px;
   background-color: #d8cece;
   cursor: pointer;
-  &:hover {
+  &:disabled &:hover {
     background-color: #aaa;
   }
 `;
-export default UserNameForm;
+export default AuthForm;

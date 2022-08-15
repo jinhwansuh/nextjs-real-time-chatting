@@ -1,13 +1,21 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
-import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useRecoilValue } from 'recoil';
 import { io, Socket } from 'socket.io-client';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
+import { userStateAtom } from '../../atoms/user';
 import { Text } from '../../components/base';
 import { StreamingChattingArea, Video } from '../../components/domain';
 import { RTC_CONFIG } from '../../constants/RTCpeerConnection';
-import useUserState from '../../hooks/useUserState';
 import { Message } from '../../types/chat';
 import { VideoEventActions } from '../../types/constants';
 import { MakeServerRoom } from '../../types/streaming';
@@ -17,7 +25,7 @@ const Create: NextPage = () => {
   const [streamState, setStreamState] = useState<MediaStream>();
   const [chatListState, setChatListState] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const userState = useUserState();
+  const userState = useRecoilValue(userStateAtom);
   const [streamData, setStreamData] = useState({
     isLive: false,
     title: '',
@@ -28,8 +36,6 @@ const Create: NextPage = () => {
   const roomId = useMemo(() => v4(), []);
 
   useEffect(() => {
-    if (!userState.name) return;
-
     const peerConnections: { [id: string]: RTCPeerConnection } = {};
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE_URL}/streaming`);
 
@@ -46,7 +52,6 @@ const Create: NextPage = () => {
     });
 
     socket.on(VideoEventActions.WATCHER, (viewer) => {
-      console.log(peerConnections);
       peerConnections[viewer.id] = new RTCPeerConnection(RTC_CONFIG);
 
       const stream = videoRef.current!.srcObject;
@@ -83,10 +88,10 @@ const Create: NextPage = () => {
       연결이 끊어졌을때 peer삭제, 끊어졌다는 알림
      */
 
-    // socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
-    //   peerConnections[id].close();
-    //   delete peerConnections[id];
-    // });
+    socket.on(VideoEventActions.DISCONNECT_PEER, (id) => {
+      peerConnections[id].close();
+      delete peerConnections[id];
+    });
 
     socket.on(VideoEventActions.CHAT_MESSAGE, (data: Message) => {
       setChatListState((prev) => [...prev, { ...data }]);
@@ -96,7 +101,7 @@ const Create: NextPage = () => {
       socket.emit(VideoEventActions.DISCONNECT_BROADCASTER, { roomId });
       socket.close();
     };
-  }, [userState.name]);
+  }, []);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -104,32 +109,38 @@ const Create: NextPage = () => {
     }
   }, [streamState]);
 
-  const handleVideoClick = async (e: MouseEvent<HTMLButtonElement>) => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: true,
-      });
-      setStreamState(stream);
+  const handleVideoClick = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: true,
+        });
+        setStreamState(stream);
 
-      e.currentTarget.disabled = true;
-    } catch (e) {
-      return;
-      // handleError(e);
-    }
-  };
-  const handleDisplayClick = async (e: MouseEvent<HTMLButtonElement>) => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-      });
-      setStreamState(stream);
+        e.currentTarget.disabled = true;
+      } catch (e) {
+        return;
+        // handleError(e);
+      }
+    },
+    []
+  );
+  const handleDisplayClick = useCallback(
+    async (e: MouseEvent<HTMLButtonElement>) => {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
+        setStreamState(stream);
 
-      e.currentTarget.disabled = true;
-    } catch (e) {
-      // handleError(e);
-    }
-  };
+        e.currentTarget.disabled = true;
+      } catch (e) {
+        // handleError(e);
+      }
+    },
+    []
+  );
 
   const handleStartStreaming = () => {
     try {
@@ -164,7 +175,7 @@ const Create: NextPage = () => {
         <title>{'create'}</title>
       </Head>
 
-      <StyledMain>
+      <main>
         <StyledContainer>
           <StyledVideoWrapper>
             <div>
@@ -190,7 +201,7 @@ const Create: NextPage = () => {
                 </StyleTitle>
 
                 <StyleTitle>
-                  Likes<StyledStreamDetails> asd</StyledStreamDetails>
+                  Likes<StyledStreamDetails> 0</StyledStreamDetails>
                 </StyleTitle>
               </StyledDetails>
               <br />
@@ -240,17 +251,14 @@ const Create: NextPage = () => {
           roomId={roomId as string}
           currentSocket={currentSocket}
         ></StreamingChattingArea>
-      </StyledMain>
+      </main>
     </>
   );
 };
 
-const StyledMain = styled.main`
-  display: flex;
-`;
-
 const StyledContainer = styled.div`
   margin-right: 20px;
+  min-width: 650px;
 `;
 
 const StyledDetails = styled.div`

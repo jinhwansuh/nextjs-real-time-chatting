@@ -3,7 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { Socket } from 'socket.io-client';
 import styled, { CSSProperties } from 'styled-components';
 import { v4 } from 'uuid';
-import { user } from '../../../atoms/user';
+import { userStateAtom } from '../../../atoms/user';
 import { Message } from '../../../types/chat';
 import { VideoEventActions } from '../../../types/constants';
 import ChatItem from './ChatItem';
@@ -23,7 +23,7 @@ const StreamingChattingArea = ({
 }: Props) => {
   const [chatInputState, setChatInputState] = useState('');
   const chattingRef = useRef<HTMLDivElement>(null);
-  const userState = useRecoilValue(user);
+  const userState = useRecoilValue(userStateAtom);
 
   const handleChatSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ const StreamingChattingArea = ({
 const StyledChattingContainer = styled.div`
   overflow-y: auto;
   position: relative;
-  width: 400px;
+  min-width: 350px;
   height: 500px;
 `;
 const StyledChattingWrapper = styled.div`
