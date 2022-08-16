@@ -115,7 +115,7 @@ const StreamingRoom: NextPage<Props> = ({ title }) => {
       <main>
         <StyledStreamingWrapper>
           <div>
-            <Video width={600} videoRef={videoRef} autoPlay playsInline muted />
+            <Video width={600} ref={videoRef} autoPlay playsInline muted />
           </div>
           <StreamingChattingArea
             chatListState={chatListState}

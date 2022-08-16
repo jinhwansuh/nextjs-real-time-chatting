@@ -179,7 +179,7 @@ const Create: NextPage = () => {
         <StyledContainer>
           <StyledVideoWrapper>
             <div>
-              <Video width={400} videoRef={videoRef} autoPlay />
+              <Video width={400} ref={videoRef} autoPlay />
               <StyledIsLiveWrapper>
                 <StyledIcon
                   style={{

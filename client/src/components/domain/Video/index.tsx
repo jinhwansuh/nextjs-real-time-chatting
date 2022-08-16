@@ -1,9 +1,8 @@
-import { CSSProperties, RefObject } from 'react';
+import React, { CSSProperties, ForwardedRef, forwardRef } from 'react';
 import styled from 'styled-components';
 
 interface Props {
   width: number;
-  videoRef: RefObject<HTMLVideoElement>;
   autoPlay?: boolean;
   playsInline?: boolean;
   muted?: boolean;
@@ -11,13 +10,11 @@ interface Props {
   style?: CSSProperties;
 }
 
-const Video = ({
-  videoRef,
-  autoPlay = true,
-  playsInline,
-  muted,
-  ...props
-}: Props) => {
+const Video = (
+  { autoPlay = true, playsInline, muted, ...props }: Props,
+  videoRef: ForwardedRef<HTMLVideoElement>
+) => {
+  console.log;
   return (
     <StyledVideoWrapper {...props}>
       <StyledVideo
@@ -41,4 +38,4 @@ const StyledVideo = styled.video`
   height: 100%;
 `;
 
-export default Video;
+export default forwardRef(Video);
