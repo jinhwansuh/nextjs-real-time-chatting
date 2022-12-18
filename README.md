@@ -2,7 +2,7 @@
 
 > simple real time chatting application
 
-**서버 호스팅 render 무료버전을 사용하고 있어 socket 채팅이 끊길수 있습니다.**
+**서버 호스팅 [render 무료버전](https://render.com/)을 사용하고 있어 socket 채팅이 끊길수 있습니다.**
 
 **client**
 
